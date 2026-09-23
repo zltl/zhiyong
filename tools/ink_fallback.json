@@ -1,0 +1,57 @@
+[
+ {
+  "index": 4,
+  "kind": "cao",
+  "reason": "stain"
+ },
+ {
+  "index": 7,
+  "kind": "zhen",
+  "reason": "torn"
+ },
+ {
+  "index": 9,
+  "kind": "cao",
+  "reason": "torn"
+ },
+ {
+  "index": 9,
+  "kind": "zhen",
+  "reason": "torn"
+ },
+ {
+  "index": 10,
+  "kind": "cao",
+  "reason": "torn"
+ },
+ {
+  "index": 19,
+  "kind": "cao",
+  "reason": "torn"
+ },
+ {
+  "index": 19,
+  "kind": "zhen",
+  "reason": "torn"
+ },
+ {
+  "index": 500,
+  "kind": "cao",
+  "reason": "lost"
+ },
+ {
+  "index": 501,
+  "kind": "cao",
+  "reason": "lost"
+ },
+ {
+  "index": 502,
+  "kind": "cao",
+  "reason": "lost"
+ },
+ {
+  "index": 503,
+  "kind": "cao",
+  "reason": "lost"
+ }
+]

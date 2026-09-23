@@ -1,0 +1,15 @@
+.gradle/
+build/
+local.properties
+.idea/
+*.iml
+captures/
+.cxx/
+.externalNativeBuild/
+.kotlin/
+data/ogawa/pages/
+data/ogawa/glyphs/
+data/ogawa/debug/
+data/ogawa/*.jpg
+moji.zip
+data/guanzhong/
