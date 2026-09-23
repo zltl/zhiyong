@@ -11,12 +11,6 @@ enum class ScriptStyle {
             CAO -> "cao"
         }
 
-    val label: String
-        get() = when (this) {
-            ZHEN -> "真"
-            CAO -> "草"
-        }
-
     val bookLabel: String
         get() = when (this) {
             ZHEN -> "真书"

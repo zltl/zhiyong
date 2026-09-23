@@ -1,5 +1,9 @@
 package app.zhencao.qianwen.ui
 
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.VectorConverter
+import androidx.compose.animation.core.animate
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.awaitEachGesture
@@ -36,23 +40,30 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.PointerInputScope
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.positionChanged
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import app.zhencao.qianwen.AppViewModel
+import app.zhencao.qianwen.data.Corpus
 import app.zhencao.qianwen.data.db.PracticeEntity
 import app.zhencao.qianwen.model.CharacterEntry
 import app.zhencao.qianwen.model.GlyphBook
@@ -65,6 +76,10 @@ import java.time.format.DateTimeFormatter
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.roundToInt
+import kotlin.math.sign
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 
 @Composable
 fun StudioScreen(
@@ -84,8 +99,28 @@ fun StudioScreen(
     val picker = rememberSheetPicker(vm, onReady = onFrame)
     var compare by remember { mutableStateOf(false) }
     val otherBook = if (entry.shownBook(script) == GlyphBook.OGAWA) GlyphBook.GUANZHONG else GlyphBook.OGAWA
+    val scope = rememberCoroutineScope()
+    val pager = remember {
+        GlyphPager(
+            initial = index,
+            lastIndex = vm.corpus.characters.lastIndex,
+            scope = scope,
+            onCommit = vm::select,
+        )
+    }
+    LaunchedEffect(index) { pager.followSelection(index) }
+    val shown = vm.corpus[pager.shown]
     Column(modifier.fillMaxSize().padding(horizontal = 20.dp, vertical = 12.dp)) {
-        StudioHeader(vm, entry, script, onBack)
+        StudioHeader(
+            vm,
+            shown,
+            script,
+            onBack,
+            canPrevious = pager.focus > 0,
+            canNext = pager.focus < vm.corpus.characters.lastIndex,
+            onPrevious = { pager.go(pager.focus - 1) },
+            onNext = { pager.go(pager.focus + 1) },
+        )
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
             FilterChip(
                 selected = compare,
@@ -94,12 +129,11 @@ fun StudioScreen(
             )
         }
         ModelView(
-            entry,
+            vm.corpus,
+            pager,
             script,
             compare,
             otherBook,
-            onPrevious = { if (entry.index > 0) vm.select(entry.index - 1) },
-            onNext = { if (entry.index < vm.corpus.characters.lastIndex) vm.select(entry.index + 1) },
             modifier = Modifier.weight(1f).fillMaxWidth(),
         )
         PracticeStrip(vm, practices, onOpenPractice)
@@ -123,6 +157,10 @@ private fun StudioHeader(
     entry: CharacterEntry,
     script: ScriptStyle,
     onBack: () -> Unit,
+    canPrevious: Boolean,
+    canNext: Boolean,
+    onPrevious: () -> Unit,
+    onNext: () -> Unit,
 ) {
     Box(Modifier.fillMaxWidth()) {
         TextButton(
@@ -136,13 +174,13 @@ private fun StudioHeader(
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                IconButton(onClick = { vm.select(entry.index - 1) }, enabled = entry.index > 0) {
+                IconButton(onClick = onPrevious, enabled = canPrevious) {
                     Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "上一个字")
                 }
                 Text(entry.char, fontFamily = FontFamily.Serif, fontSize = 36.sp)
                 IconButton(
-                    onClick = { vm.select(entry.index + 1) },
-                    enabled = entry.index < vm.corpus.characters.lastIndex,
+                    onClick = onNext,
+                    enabled = canNext,
                 ) {
                     Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = "下一个字")
                 }
@@ -158,25 +196,104 @@ private fun StudioHeader(
 
 @Composable
 private fun ModelView(
+    corpus: Corpus,
+    pager: GlyphPager,
+    script: ScriptStyle,
+    compare: Boolean,
+    otherBook: GlyphBook,
+    modifier: Modifier,
+) {
+    var scale by remember(pager.shown) { mutableFloatStateOf(1f) }
+    var zoomPan by remember(pager.shown) { mutableStateOf(Offset.Zero) }
+    Box(modifier) {
+        Box(
+            Modifier
+                .fillMaxSize()
+                .clipToBounds()
+                .onSizeChanged { pager.viewport = it }
+                .pointerInput(compare) {
+                    detectGlyphGestures(
+                        onTransform = if (compare) {
+                            null
+                        } else {
+                            { pan, zoom ->
+                                scale = (scale * zoom).coerceIn(1f, 4f)
+                                zoomPan += pan
+                            }
+                        },
+                        onGrab = { pager.grab() },
+                        onDrag = pager::drag,
+                        onRelease = { pager.release(glyphSwipeThreshold.toPx()) },
+                        onCancel = pager::cancelDrag,
+                    )
+                },
+        ) {
+            val last = corpus.characters.lastIndex
+            val neighbor = pager.incoming ?: incomingIndex(pager.shown, pager.slide, last)
+            val width = pager.viewport.width.toFloat()
+            val height = pager.viewport.height.toFloat()
+            val turning = pager.slide != Offset.Zero || pager.incoming != null
+            val sheet = if (turning) Modifier.background(MaterialTheme.colorScheme.background) else Modifier
+            if (neighbor != null && width > 0f && height > 0f) {
+                GlyphPage(
+                    corpus[neighbor],
+                    script,
+                    compare,
+                    otherBook,
+                    Modifier.fillMaxSize().graphicsLayer {
+                        val place = incomingOffset(
+                            pager.slide,
+                            width,
+                            height,
+                            pager.incoming?.let { it > pager.shown },
+                        )
+                        translationX = place.x
+                        translationY = place.y
+                    }.then(sheet),
+                )
+            }
+            val pageScale = if (compare) 1f else scale
+            val pagePan = if (compare) Offset.Zero else zoomPan
+            GlyphPage(
+                corpus[pager.shown],
+                script,
+                compare,
+                otherBook,
+                Modifier.fillMaxSize().graphicsLayer {
+                    scaleX = pageScale
+                    scaleY = pageScale
+                    translationX = pager.slide.x + pagePan.x
+                    translationY = pager.slide.y + pagePan.y
+                    if (turning) {
+                        shadowElevation = 10.dp.toPx()
+                        shape = RectangleShape
+                        clip = false
+                    }
+                }.then(sheet),
+            )
+        }
+        if (!compare && (scale != 1f || zoomPan != Offset.Zero)) {
+            TextButton(
+                onClick = {
+                    scale = 1f
+                    zoomPan = Offset.Zero
+                },
+                modifier = Modifier.align(Alignment.TopEnd),
+            ) { Text("还原") }
+        }
+    }
+}
+
+@Composable
+private fun GlyphPage(
     entry: CharacterEntry,
     script: ScriptStyle,
     compare: Boolean,
     otherBook: GlyphBook,
-    onPrevious: () -> Unit,
-    onNext: () -> Unit,
     modifier: Modifier,
 ) {
     if (compare) {
-        BoxWithConstraints(
-            modifier.pointerInput(entry.index) {
-                detectGlyphGestures(onTransform = null, onTurn = { turn ->
-                    when (turn) {
-                        GlyphTurn.Next -> onNext()
-                        GlyphTurn.Previous -> onPrevious()
-                    }
-                })
-            },
-        ) {
+        BoxWithConstraints(modifier) {
             val cell = minOf((maxWidth - 8.dp) / 2, maxHeight)
             Row(
                 Modifier.align(Alignment.Center),
@@ -188,51 +305,15 @@ private fun ModelView(
         }
         return
     }
-    var scale by remember(entry.index) { mutableFloatStateOf(1f) }
-    var offset by remember(entry.index) { mutableStateOf(Offset.Zero) }
     val photo = rememberGlyphBitmap(entry.glyphAsset(script))
     val label = frameLabel(entry, script, entry.shownBook(script))
-    Box(modifier) {
-        BoxWithConstraints(
-            Modifier
-                .fillMaxSize()
-                .graphicsLayer {
-                    scaleX = scale
-                    scaleY = scale
-                    translationX = offset.x
-                    translationY = offset.y
-                }
-                .pointerInput(entry.index) {
-                    detectGlyphGestures(
-                        onTransform = { pan, zoom ->
-                            scale = (scale * zoom).coerceIn(1f, 4f)
-                            offset += pan
-                        },
-                        onTurn = { turn ->
-                            when (turn) {
-                                GlyphTurn.Next -> onNext()
-                                GlyphTurn.Previous -> onPrevious()
-                            }
-                        },
-                    )
-                },
+    BoxWithConstraints(modifier) {
+        val cell = minOf(maxWidth, maxHeight) - 8.dp
+        GlyphFrame(
+            label,
+            Modifier.align(Alignment.Center).size(cell).clip(RoundedCornerShape(14.dp)),
         ) {
-            val cell = minOf(maxWidth, maxHeight) - 8.dp
-            GlyphFrame(
-                label,
-                Modifier.align(Alignment.Center).size(cell).clip(RoundedCornerShape(14.dp)),
-            ) {
-                if (photo != null) drawFitted(photo)
-            }
-        }
-        if (scale != 1f || offset != Offset.Zero) {
-            TextButton(
-                onClick = {
-                    scale = 1f
-                    offset = Offset.Zero
-                },
-                modifier = Modifier.align(Alignment.TopEnd),
-            ) { Text("还原") }
+            if (photo != null) drawFitted(photo)
         }
     }
 }
@@ -252,6 +333,9 @@ private fun EditionFrame(
 
 private val glyphSwipeThreshold = 48.dp
 
+/** How far a swipe still follows the finger when there is no further glyph. */
+internal const val slideResistance = 0.28f
+
 internal enum class GlyphTurn { Next, Previous }
 
 /** Up or right selects the next glyph; down or left selects the previous one. */
@@ -266,13 +350,195 @@ internal fun glyphTurn(dx: Float, dy: Float, threshold: Float): GlyphTurn? {
     }
 }
 
+/** Finger position before resistance, so a second grab does not rubber-band twice. */
+internal fun unwindSlide(slide: Offset, index: Int, lastIndex: Int): Offset {
+    if (slide == Offset.Zero) return Offset.Zero
+    if (incomingIndex(index, slide, lastIndex) != null) return slide
+    return Offset(slide.x / slideResistance, slide.y / slideResistance)
+}
+
+/** Locks the swipe to its dominant axis, and shortens it at the first or last glyph. */
+internal fun resistedSlide(dx: Float, dy: Float, index: Int, lastIndex: Int): Offset {
+    val slide = if (abs(dx) >= abs(dy)) Offset(dx, 0f) else Offset(0f, dy)
+    if (slide == Offset.Zero) return Offset.Zero
+    return if (incomingIndex(index, slide, lastIndex) == null) {
+        Offset(slide.x * slideResistance, slide.y * slideResistance)
+    } else {
+        slide
+    }
+}
+
+/** Glyph that should slide in beside [index], or null at the ends of the text. */
+internal fun incomingIndex(index: Int, drag: Offset, lastIndex: Int): Int? {
+    val turn = glyphTurn(drag.x, drag.y, 0.5f) ?: return null
+    val next = when (turn) {
+        GlyphTurn.Next -> index + 1
+        GlyphTurn.Previous -> index - 1
+    }
+    return next.takeIf { it in 0..lastIndex }
+}
+
+/**
+ * Where the incoming page sits so it stays one viewport away and moves with [drag].
+ * [forwardHint] covers the moment a button turn has started but the page has not moved yet.
+ */
+internal fun incomingOffset(
+    drag: Offset,
+    width: Float,
+    height: Float,
+    forwardHint: Boolean? = null,
+): Offset {
+    val aimX: Float
+    val aimY: Float
+    when {
+        forwardHint != null -> {
+            aimX = if (forwardHint) 1f else -1f
+            aimY = 0f
+        }
+        abs(drag.x) >= abs(drag.y) && drag.x != 0f -> {
+            aimX = sign(drag.x)
+            aimY = 0f
+        }
+        drag.y != 0f -> {
+            aimX = 0f
+            aimY = sign(drag.y)
+        }
+        else -> return Offset.Zero
+    }
+    return Offset(drag.x - aimX * width, drag.y - aimY * height)
+}
+
+/** Resting place once the finger has committed to turning the page. */
+internal fun settleTarget(drag: Offset, width: Float, height: Float): Offset {
+    return if (abs(drag.x) >= abs(drag.y)) {
+        Offset(sign(drag.x) * width, 0f)
+    } else {
+        Offset(0f, sign(drag.y) * height)
+    }
+}
+
+/**
+ * Slides the shown glyph with the finger. [shown] changes only after the page has finished moving,
+ * so the picture eases into place instead of swapping under the finger.
+ */
+private class GlyphPager(
+    initial: Int,
+    private val lastIndex: Int,
+    private val scope: CoroutineScope,
+    private val onCommit: (Int) -> Unit,
+) {
+    var shown by mutableIntStateOf(initial)
+    var slide by mutableStateOf(Offset.Zero)
+    var incoming by mutableStateOf<Int?>(null)
+    var viewport by mutableStateOf(IntSize.Zero)
+    private var job: Job? = null
+    private var epoch = 0
+
+    /** Index the arrows act on, including a turn that is already in flight. */
+    val focus: Int get() = incoming ?: shown
+
+    fun followSelection(index: Int) {
+        if (job?.isActive == true || slide != Offset.Zero || incoming != null) return
+        val next = index.coerceIn(0, lastIndex)
+        if (shown != next) shown = next
+    }
+
+    fun grab(): Offset {
+        epoch++
+        job?.cancel()
+        job = null
+        return unwindSlide(slide, shown, lastIndex)
+    }
+
+    fun drag(pan: Offset) {
+        incoming = null
+        slide = resistedSlide(pan.x, pan.y, shown, lastIndex)
+    }
+
+    fun cancelDrag() {
+        epoch++
+        job?.cancel()
+        job = null
+        incoming = null
+        slide = Offset.Zero
+    }
+
+    fun release(thresholdPx: Float) {
+        val landed = incomingIndex(shown, slide, lastIndex)
+        val turn = glyphTurn(slide.x, slide.y, thresholdPx)
+        if (turn == null || landed == null || viewport.width == 0 || viewport.height == 0) {
+            if (slide != Offset.Zero) animate(Offset.Zero) { incoming = null }
+            return
+        }
+        val target = settleTarget(slide, viewport.width.toFloat(), viewport.height.toFloat())
+        animate(target) {
+            incoming = null
+            slide = Offset.Zero
+            shown = landed
+            onCommit(landed)
+        }
+    }
+
+    fun go(index: Int) {
+        val next = index.coerceIn(0, lastIndex)
+        if (next == incoming) return
+        if (next == shown && incoming == null) {
+            if (slide != Offset.Zero) animate(Offset.Zero) { }
+            return
+        }
+        if (viewport.width == 0 || viewport.height == 0) {
+            incoming = null
+            slide = Offset.Zero
+            shown = next
+            onCommit(next)
+            return
+        }
+        incoming = next
+        val target = Offset(
+            if (next > shown) viewport.width.toFloat() else -viewport.width.toFloat(),
+            0f,
+        )
+        animate(target) {
+            incoming = null
+            slide = Offset.Zero
+            shown = next
+            onCommit(next)
+        }
+    }
+
+    private fun animate(target: Offset, end: () -> Unit) {
+        val ticket = ++epoch
+        val start = slide
+        job?.cancel()
+        job = scope.launch {
+            if (start != target) {
+                val distance = (target - start).getDistance()
+                val span = max(viewport.width, viewport.height).toFloat().coerceAtLeast(1f)
+                val duration = (260f * distance / span).toInt().coerceIn(160, 280)
+                animate(
+                    typeConverter = Offset.VectorConverter,
+                    initialValue = start,
+                    targetValue = target,
+                    animationSpec = tween(duration, easing = FastOutSlowInEasing),
+                ) { value, _ ->
+                    if (epoch == ticket) slide = value
+                }
+            }
+            if (epoch == ticket) end()
+        }
+    }
+}
+
 private suspend fun PointerInputScope.detectGlyphGestures(
     onTransform: ((pan: Offset, zoom: Float) -> Unit)?,
-    onTurn: (GlyphTurn) -> Unit,
+    onGrab: () -> Offset,
+    onDrag: (Offset) -> Unit,
+    onRelease: () -> Unit,
+    onCancel: () -> Unit,
 ) {
-    val threshold = glyphSwipeThreshold.toPx()
     awaitEachGesture {
         awaitFirstDown(requireUnconsumed = false)
+        val origin = onGrab()
         var multiTouch = false
         var pan = Offset.Zero
         while (true) {
@@ -285,18 +551,19 @@ private suspend fun PointerInputScope.detectGlyphGestures(
                 if (zoom != 1f || drag != Offset.Zero) onTransform(drag, zoom)
             } else if (!multiTouch) {
                 pan += event.calculatePan()
+                onDrag(origin + pan)
             }
             event.changes.forEach { if (it.positionChanged()) it.consume() }
             if (pressed == 0) break
         }
-        if (!multiTouch) glyphTurn(pan.x, pan.y, threshold)?.let(onTurn)
+        if (multiTouch) onCancel() else onRelease()
     }
 }
 
 private fun frameLabel(entry: CharacterEntry, script: ScriptStyle, book: GlyphBook): String =
     when (book) {
-        GlyphBook.OGAWA -> if (entry.usesFallback(script)) "小川本" else script.label
-        GlyphBook.GUANZHONG -> if (entry.usesFallback(script)) "${script.label} · 关中本补" else "关中本"
+        GlyphBook.OGAWA -> if (entry.usesFallback(script)) "小川本" else ""
+        GlyphBook.GUANZHONG -> if (entry.usesFallback(script)) "关中本补" else "关中本"
     }
 
 @Composable
