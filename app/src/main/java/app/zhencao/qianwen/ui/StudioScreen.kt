@@ -2,7 +2,10 @@ package app.zhencao.qianwen.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectTransformGestures
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.calculatePan
+import androidx.compose.foundation.gestures.calculateZoom
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -43,7 +46,9 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.PointerInputScope
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.input.pointer.positionChanged
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -57,6 +62,8 @@ import app.zhencao.qianwen.ui.theme.Zhu
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import kotlin.math.abs
+import kotlin.math.max
 import kotlin.math.roundToInt
 
 @Composable
@@ -86,7 +93,15 @@ fun StudioScreen(
                 label = { Text("对照${otherBook.label}") },
             )
         }
-        ModelView(entry, script, compare, otherBook, Modifier.weight(1f).fillMaxWidth())
+        ModelView(
+            entry,
+            script,
+            compare,
+            otherBook,
+            onPrevious = { if (entry.index > 0) vm.select(entry.index - 1) },
+            onNext = { if (entry.index < vm.corpus.characters.lastIndex) vm.select(entry.index + 1) },
+            modifier = Modifier.weight(1f).fillMaxWidth(),
+        )
         PracticeStrip(vm, practices, onOpenPractice)
         picker.message?.let { Text(it, color = MaterialTheme.colorScheme.primary) }
         Row(
@@ -109,24 +124,34 @@ private fun StudioHeader(
     script: ScriptStyle,
     onBack: () -> Unit,
 ) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        TextButton(onClick = onBack) { Text("返回") }
-        IconButton(onClick = { vm.select(entry.index - 1) }, enabled = entry.index > 0) {
-            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "上一个字")
-        }
-        Column(Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(entry.char, fontFamily = FontFamily.Serif, fontSize = 36.sp)
+    Box(Modifier.fillMaxWidth()) {
+        TextButton(
+            onClick = onBack,
+            modifier = Modifier.align(Alignment.CenterStart),
+        ) { Text("返回") }
+        Column(
+            Modifier
+                .align(Alignment.Center)
+                .padding(horizontal = 72.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                IconButton(onClick = { vm.select(entry.index - 1) }, enabled = entry.index > 0) {
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "上一个字")
+                }
+                Text(entry.char, fontFamily = FontFamily.Serif, fontSize = 36.sp)
+                IconButton(
+                    onClick = { vm.select(entry.index + 1) },
+                    enabled = entry.index < vm.corpus.characters.lastIndex,
+                ) {
+                    Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = "下一个字")
+                }
+            }
             Text(
                 "${script.bookLabel} · ${vm.corpus.groupText(entry.group)}",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
-        }
-        IconButton(
-            onClick = { vm.select(entry.index + 1) },
-            enabled = entry.index < vm.corpus.characters.lastIndex,
-        ) {
-            Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = "下一个字")
         }
     }
 }
@@ -137,10 +162,21 @@ private fun ModelView(
     script: ScriptStyle,
     compare: Boolean,
     otherBook: GlyphBook,
+    onPrevious: () -> Unit,
+    onNext: () -> Unit,
     modifier: Modifier,
 ) {
     if (compare) {
-        BoxWithConstraints(modifier) {
+        BoxWithConstraints(
+            modifier.pointerInput(entry.index) {
+                detectGlyphGestures(onTransform = null, onTurn = { turn ->
+                    when (turn) {
+                        GlyphTurn.Next -> onNext()
+                        GlyphTurn.Previous -> onPrevious()
+                    }
+                })
+            },
+        ) {
             val cell = minOf((maxWidth - 8.dp) / 2, maxHeight)
             Row(
                 Modifier.align(Alignment.Center),
@@ -167,10 +203,18 @@ private fun ModelView(
                     translationY = offset.y
                 }
                 .pointerInput(entry.index) {
-                    detectTransformGestures { _, pan, zoom, _ ->
-                        scale = (scale * zoom).coerceIn(1f, 4f)
-                        offset += pan
-                    }
+                    detectGlyphGestures(
+                        onTransform = { pan, zoom ->
+                            scale = (scale * zoom).coerceIn(1f, 4f)
+                            offset += pan
+                        },
+                        onTurn = { turn ->
+                            when (turn) {
+                                GlyphTurn.Next -> onNext()
+                                GlyphTurn.Previous -> onPrevious()
+                            }
+                        },
+                    )
                 },
         ) {
             val cell = minOf(maxWidth, maxHeight) - 8.dp
@@ -203,6 +247,49 @@ private fun EditionFrame(
     val photo = rememberGlyphBitmap(entry.glyphAsset(script, book))
     GlyphFrame(frameLabel(entry, script, book), modifier.clip(RoundedCornerShape(14.dp))) {
         if (photo != null) drawFitted(photo)
+    }
+}
+
+private val glyphSwipeThreshold = 48.dp
+
+internal enum class GlyphTurn { Next, Previous }
+
+/** Up or right selects the next glyph; down or left selects the previous one. */
+internal fun glyphTurn(dx: Float, dy: Float, threshold: Float): GlyphTurn? {
+    val horizontal = abs(dx)
+    val vertical = abs(dy)
+    if (max(horizontal, vertical) < threshold) return null
+    return if (horizontal >= vertical) {
+        if (dx > 0f) GlyphTurn.Next else GlyphTurn.Previous
+    } else {
+        if (dy < 0f) GlyphTurn.Next else GlyphTurn.Previous
+    }
+}
+
+private suspend fun PointerInputScope.detectGlyphGestures(
+    onTransform: ((pan: Offset, zoom: Float) -> Unit)?,
+    onTurn: (GlyphTurn) -> Unit,
+) {
+    val threshold = glyphSwipeThreshold.toPx()
+    awaitEachGesture {
+        awaitFirstDown(requireUnconsumed = false)
+        var multiTouch = false
+        var pan = Offset.Zero
+        while (true) {
+            val event = awaitPointerEvent()
+            val pressed = event.changes.count { it.pressed }
+            if (pressed >= 2) multiTouch = true
+            if (multiTouch && onTransform != null && pressed >= 2) {
+                val zoom = event.calculateZoom()
+                val drag = event.calculatePan()
+                if (zoom != 1f || drag != Offset.Zero) onTransform(drag, zoom)
+            } else if (!multiTouch) {
+                pan += event.calculatePan()
+            }
+            event.changes.forEach { if (it.positionChanged()) it.consume() }
+            if (pressed == 0) break
+        }
+        if (!multiTouch) glyphTurn(pan.x, pan.y, threshold)?.let(onTurn)
     }
 }
 

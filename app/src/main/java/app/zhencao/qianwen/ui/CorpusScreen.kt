@@ -78,17 +78,31 @@ fun CorpusScreen(
                             .clickable { onPickVerse(group) }
                             .padding(end = 12.dp, top = 12.dp, bottom = 12.dp),
                     )
-                    Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                        chars.forEach { entry ->
-                            Text(
-                                entry.char,
-                                fontFamily = FontFamily.Serif,
-                                fontSize = 28.sp,
-                                modifier = Modifier
-                                    .clickable { onOpen(entry.index) }
-                                    .padding(horizontal = 6.dp, vertical = 4.dp),
-                            )
+                    val note = vm.corpus.note(group)
+                    Column(Modifier.weight(1f).padding(vertical = 6.dp)) {
+                        Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                            chars.forEach { entry ->
+                                Text(
+                                    entry.char,
+                                    fontFamily = FontFamily.Serif,
+                                    fontSize = 28.sp,
+                                    modifier = Modifier
+                                        .clickable { onOpen(entry.index) }
+                                        .padding(horizontal = 6.dp, vertical = 4.dp),
+                                )
+                            }
                         }
+                        Text(
+                            note.simplified,
+                            style = MaterialTheme.typography.titleSmall,
+                            modifier = Modifier.padding(start = 6.dp),
+                        )
+                        Text(
+                            note.meaning,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(start = 6.dp, top = 2.dp),
+                        )
                     }
                     Text(
                         if (practiced > 0) "已临 $practiced/4" else "",

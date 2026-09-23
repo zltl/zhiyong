@@ -76,6 +76,20 @@ fun TodayScreen(
                 Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = "下一句")
             }
         }
+        val note = vm.corpus.note(verse)
+        Text(
+            "简体　${note.simplified}",
+            style = MaterialTheme.typography.titleMedium,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+        )
+        Text(
+            "释义　${note.meaning}",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
+        )
         Spacer(Modifier.height(16.dp))
         chars.chunked(2).forEach { pair ->
             Row(

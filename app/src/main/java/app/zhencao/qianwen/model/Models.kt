@@ -34,6 +34,11 @@ enum class GlyphBook(val label: String) {
     GUANZHONG("关中本"),
 }
 
+data class VerseNote(
+    val simplified: String,
+    val meaning: String,
+)
+
 data class CharacterEntry(
     val index: Int,
     val char: String,

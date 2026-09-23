@@ -1,7 +1,1259 @@
 {
-  "schema": 2,
+  "schema": 3,
   "note": "底帖默认小川本墨迹切图，每字另有关中本拓片可对照。",
   "fallbackNote": "小川本残缺处默认改用关中本拓片原色切图。",
+  "verses": [
+    {
+      "group": 0,
+      "simplified": "天地玄黄",
+      "meaning": "天是青黑色，地是黄色。"
+    },
+    {
+      "group": 1,
+      "simplified": "宇宙洪荒",
+      "meaning": "宇宙初开时，一片辽阔混沌。"
+    },
+    {
+      "group": 2,
+      "simplified": "日月盈昃",
+      "meaning": "太阳有正有斜，月亮有圆有缺。"
+    },
+    {
+      "group": 3,
+      "simplified": "辰宿列张",
+      "meaning": "满天星辰，排列分布在天空。"
+    },
+    {
+      "group": 4,
+      "simplified": "寒来暑往",
+      "meaning": "冷天过去，热天到来，循环不止。"
+    },
+    {
+      "group": 5,
+      "simplified": "秋收冬藏",
+      "meaning": "秋天收割庄稼，冬天储藏粮食。"
+    },
+    {
+      "group": 6,
+      "simplified": "闰余成岁",
+      "meaning": "把每年多出的日子积成闰月，补齐年岁。"
+    },
+    {
+      "group": 7,
+      "simplified": "律吕调阳",
+      "meaning": "古人用音律来调和阴阳节气。"
+    },
+    {
+      "group": 8,
+      "simplified": "云腾致雨",
+      "meaning": "云气升腾，遇冷化成雨。"
+    },
+    {
+      "group": 9,
+      "simplified": "露结为霜",
+      "meaning": "夜里露水遇冷，凝结成霜。"
+    },
+    {
+      "group": 10,
+      "simplified": "金生丽水",
+      "meaning": "黄金出产在丽水（金沙江一带）。"
+    },
+    {
+      "group": 11,
+      "simplified": "玉出昆冈",
+      "meaning": "美玉出产在昆仑山。"
+    },
+    {
+      "group": 12,
+      "simplified": "剑号巨阙",
+      "meaning": "最好的宝剑叫“巨阙”。"
+    },
+    {
+      "group": 13,
+      "simplified": "珠称夜光",
+      "meaning": "最珍贵的珍珠叫“夜光”。"
+    },
+    {
+      "group": 14,
+      "simplified": "果珍李柰",
+      "meaning": "水果里珍贵的是李子和柰（沙果）。"
+    },
+    {
+      "group": 15,
+      "simplified": "菜重芥姜",
+      "meaning": "蔬菜里看重的是芥菜和生姜。"
+    },
+    {
+      "group": 16,
+      "simplified": "海咸河淡",
+      "meaning": "海水是咸的，河水是淡的。"
+    },
+    {
+      "group": 17,
+      "simplified": "鳞潜羽翔",
+      "meaning": "鱼在水中潜游，鸟在空中飞翔。"
+    },
+    {
+      "group": 18,
+      "simplified": "龙师火帝",
+      "meaning": "上古有以龙命名官职的伏羲，以火命名官职的神农。"
+    },
+    {
+      "group": 19,
+      "simplified": "鸟官人皇",
+      "meaning": "有以鸟命名官职的少昊，还有人皇。"
+    },
+    {
+      "group": 20,
+      "simplified": "始制文字",
+      "meaning": "（仓颉）开始创造文字。"
+    },
+    {
+      "group": 21,
+      "simplified": "乃服衣裳",
+      "meaning": "人们开始穿上衣裳。"
+    },
+    {
+      "group": 22,
+      "simplified": "推位让国",
+      "meaning": "把帝位让给贤能的人。"
+    },
+    {
+      "group": 23,
+      "simplified": "有虞陶唐",
+      "meaning": "说的是虞舜和唐尧。"
+    },
+    {
+      "group": 24,
+      "simplified": "吊民伐罪",
+      "meaning": "安抚百姓，讨伐有罪的君主。"
+    },
+    {
+      "group": 25,
+      "simplified": "周发殷汤",
+      "meaning": "说的是周武王姬发和商汤。"
+    },
+    {
+      "group": 26,
+      "simplified": "坐朝问道",
+      "meaning": "贤君坐在朝堂上，向大臣询问治国之道。"
+    },
+    {
+      "group": 27,
+      "simplified": "垂拱平章",
+      "meaning": "垂衣拱手，天下就太平清明。"
+    },
+    {
+      "group": 28,
+      "simplified": "爱育黎首",
+      "meaning": "爱护抚育百姓。"
+    },
+    {
+      "group": 29,
+      "simplified": "臣伏戎羌",
+      "meaning": "四方各族都来归顺称臣。"
+    },
+    {
+      "group": 30,
+      "simplified": "遐迩一体",
+      "meaning": "远近各地连成一个整体。"
+    },
+    {
+      "group": 31,
+      "simplified": "率宾归王",
+      "meaning": "天下人都归服君王。"
+    },
+    {
+      "group": 32,
+      "simplified": "鸣凤在竹",
+      "meaning": "凤凰在竹林中鸣叫。"
+    },
+    {
+      "group": 33,
+      "simplified": "白驹食场",
+      "meaning": "白马在草场上吃草。"
+    },
+    {
+      "group": 34,
+      "simplified": "化被草木",
+      "meaning": "圣君的教化连草木都受到了。"
+    },
+    {
+      "group": 35,
+      "simplified": "赖及万方",
+      "meaning": "恩泽遍及四面八方。"
+    },
+    {
+      "group": 36,
+      "simplified": "盖此身发",
+      "meaning": "说到人的身体发肤。"
+    },
+    {
+      "group": 37,
+      "simplified": "四大五常",
+      "meaning": "身合地水火风“四大”，心守仁义礼智信“五常”。"
+    },
+    {
+      "group": 38,
+      "simplified": "恭惟鞠养",
+      "meaning": "要恭敬地想着父母的养育之恩。"
+    },
+    {
+      "group": 39,
+      "simplified": "岂敢毁伤",
+      "meaning": "怎敢随意损伤身体。"
+    },
+    {
+      "group": 40,
+      "simplified": "女慕贞洁",
+      "meaning": "女子仰慕贞节纯洁。"
+    },
+    {
+      "group": 41,
+      "simplified": "男效才良",
+      "meaning": "男子效法有才德的人。"
+    },
+    {
+      "group": 42,
+      "simplified": "知过必改",
+      "meaning": "知道有错一定要改。"
+    },
+    {
+      "group": 43,
+      "simplified": "得能莫忘",
+      "meaning": "学到的本领不要忘记。"
+    },
+    {
+      "group": 44,
+      "simplified": "罔谈彼短",
+      "meaning": "不要议论别人的短处。"
+    },
+    {
+      "group": 45,
+      "simplified": "靡恃己长",
+      "meaning": "不要倚仗自己的长处。"
+    },
+    {
+      "group": 46,
+      "simplified": "信使可覆",
+      "meaning": "说话守信，要经得起检验。"
+    },
+    {
+      "group": 47,
+      "simplified": "器欲难量",
+      "meaning": "气度要大，大得难以估量。"
+    },
+    {
+      "group": 48,
+      "simplified": "墨悲丝染",
+      "meaning": "墨子看到白丝被染色而悲叹，人也容易被环境改变。"
+    },
+    {
+      "group": 49,
+      "simplified": "诗赞羔羊",
+      "meaning": "《诗经·羔羊》赞美品德纯洁的官员。"
+    },
+    {
+      "group": 50,
+      "simplified": "景行维贤",
+      "meaning": "行为光明正大，才能成为贤人。"
+    },
+    {
+      "group": 51,
+      "simplified": "克念作圣",
+      "meaning": "克制私念，就能成为圣人。"
+    },
+    {
+      "group": 52,
+      "simplified": "德建名立",
+      "meaning": "品德建立起来，名声自然树立。"
+    },
+    {
+      "group": 53,
+      "simplified": "形端表正",
+      "meaning": "身体端正，仪表自然正直。"
+    },
+    {
+      "group": 54,
+      "simplified": "空谷传声",
+      "meaning": "空旷的山谷里，声音传得很远。"
+    },
+    {
+      "group": 55,
+      "simplified": "虚堂习听",
+      "meaning": "空荡的厅堂里，声音听得清楚。"
+    },
+    {
+      "group": 56,
+      "simplified": "祸因恶积",
+      "meaning": "灾祸是因为坏事做多了。"
+    },
+    {
+      "group": 57,
+      "simplified": "福缘善庆",
+      "meaning": "福气来自多做好事。"
+    },
+    {
+      "group": 58,
+      "simplified": "尺璧非宝",
+      "meaning": "一尺长的美玉不算真正的宝贝。"
+    },
+    {
+      "group": 59,
+      "simplified": "寸阴是竞",
+      "meaning": "一寸光阴才值得争取。"
+    },
+    {
+      "group": 60,
+      "simplified": "资父事君",
+      "meaning": "用侍奉父亲的心来侍奉君主。"
+    },
+    {
+      "group": 61,
+      "simplified": "曰严与敬",
+      "meaning": "要做到严肃和恭敬。"
+    },
+    {
+      "group": 62,
+      "simplified": "孝当竭力",
+      "meaning": "孝顺父母要尽心尽力。"
+    },
+    {
+      "group": 63,
+      "simplified": "忠则尽命",
+      "meaning": "忠于国家要不惜生命。"
+    },
+    {
+      "group": 64,
+      "simplified": "临深履薄",
+      "meaning": "做事要像走近深渊、踩着薄冰一样谨慎。"
+    },
+    {
+      "group": 65,
+      "simplified": "夙兴温凊",
+      "meaning": "早起侍奉父母，冬天让他们暖，夏天让他们凉。"
+    },
+    {
+      "group": 66,
+      "simplified": "似兰斯馨",
+      "meaning": "德行像兰花一样芳香。"
+    },
+    {
+      "group": 67,
+      "simplified": "如松之盛",
+      "meaning": "像松树一样茂盛常青。"
+    },
+    {
+      "group": 68,
+      "simplified": "川流不息",
+      "meaning": "像河水一样流淌不停。"
+    },
+    {
+      "group": 69,
+      "simplified": "渊澄取映",
+      "meaning": "像深潭一样清澈，能照见人影。"
+    },
+    {
+      "group": 70,
+      "simplified": "容止若思",
+      "meaning": "举止要沉静，像在思考。"
+    },
+    {
+      "group": 71,
+      "simplified": "言辞安定",
+      "meaning": "说话要安稳从容。"
+    },
+    {
+      "group": 72,
+      "simplified": "笃初诚美",
+      "meaning": "开头认真做好，固然很好。"
+    },
+    {
+      "group": 73,
+      "simplified": "慎终宜令",
+      "meaning": "结尾也谨慎做好，才更好。"
+    },
+    {
+      "group": 74,
+      "simplified": "荣业所基",
+      "meaning": "这些是成就荣耀事业的基础。"
+    },
+    {
+      "group": 75,
+      "simplified": "籍甚无竟",
+      "meaning": "有了这个基础，名声会远扬无尽。"
+    },
+    {
+      "group": 76,
+      "simplified": "学优登仕",
+      "meaning": "学问好了就可以做官。"
+    },
+    {
+      "group": 77,
+      "simplified": "摄职从政",
+      "meaning": "担任职务，参与政事。"
+    },
+    {
+      "group": 78,
+      "simplified": "存以甘棠",
+      "meaning": "召公在甘棠树下理政，百姓留下这棵树纪念他。"
+    },
+    {
+      "group": 79,
+      "simplified": "去而益咏",
+      "meaning": "他离开后，百姓更加歌颂他。"
+    },
+    {
+      "group": 80,
+      "simplified": "乐殊贵贱",
+      "meaning": "音乐因身份贵贱而有区别。"
+    },
+    {
+      "group": 81,
+      "simplified": "礼别尊卑",
+      "meaning": "礼节因地位尊卑而有分别。"
+    },
+    {
+      "group": 82,
+      "simplified": "上和下睦",
+      "meaning": "长辈和气，晚辈和睦。"
+    },
+    {
+      "group": 83,
+      "simplified": "夫唱妇随",
+      "meaning": "丈夫倡导，妻子相随。"
+    },
+    {
+      "group": 84,
+      "simplified": "外受傅训",
+      "meaning": "在外接受老师的教导。"
+    },
+    {
+      "group": 85,
+      "simplified": "入奉母仪",
+      "meaning": "在家遵守母亲的规范。"
+    },
+    {
+      "group": 86,
+      "simplified": "诸姑伯叔",
+      "meaning": "姑姑、伯伯、叔叔这些长辈。"
+    },
+    {
+      "group": 87,
+      "simplified": "犹子比儿",
+      "meaning": "对待侄儿侄女，要像亲生孩子一样。"
+    },
+    {
+      "group": 88,
+      "simplified": "孔怀兄弟",
+      "meaning": "兄弟之间要非常关爱。"
+    },
+    {
+      "group": 89,
+      "simplified": "同气连枝",
+      "meaning": "兄弟血气相同，像树枝连在一起。"
+    },
+    {
+      "group": 90,
+      "simplified": "交友投分",
+      "meaning": "交朋友要意气相投。"
+    },
+    {
+      "group": 91,
+      "simplified": "切磨箴规",
+      "meaning": "互相切磋学问，互相劝诫过失。"
+    },
+    {
+      "group": 92,
+      "simplified": "仁慈隐恻",
+      "meaning": "仁爱之心、同情之心。"
+    },
+    {
+      "group": 93,
+      "simplified": "造次弗离",
+      "meaning": "即使在仓促之间，也不能丢掉。"
+    },
+    {
+      "group": 94,
+      "simplified": "节义廉退",
+      "meaning": "气节、正义、廉洁、谦让。"
+    },
+    {
+      "group": 95,
+      "simplified": "颠沛匪亏",
+      "meaning": "即使颠沛流离，也不能缺失。"
+    },
+    {
+      "group": 96,
+      "simplified": "性静情逸",
+      "meaning": "心性沉静，情绪就安逸。"
+    },
+    {
+      "group": 97,
+      "simplified": "心动神疲",
+      "meaning": "心思浮动，精神就疲惫。"
+    },
+    {
+      "group": 98,
+      "simplified": "守真志满",
+      "meaning": "守住本心，心里就充实满足。"
+    },
+    {
+      "group": 99,
+      "simplified": "逐物意移",
+      "meaning": "追逐外物，意志就会动摇。"
+    },
+    {
+      "group": 100,
+      "simplified": "坚持雅操",
+      "meaning": "坚持高尚的操守。"
+    },
+    {
+      "group": 101,
+      "simplified": "好爵自縻",
+      "meaning": "好的官位自然会来。"
+    },
+    {
+      "group": 102,
+      "simplified": "都邑华夏",
+      "meaning": "华夏的都城。"
+    },
+    {
+      "group": 103,
+      "simplified": "东西二京",
+      "meaning": "有东西两京：洛阳和长安。"
+    },
+    {
+      "group": 104,
+      "simplified": "背邙面洛",
+      "meaning": "洛阳背靠邙山，面对洛水。"
+    },
+    {
+      "group": 105,
+      "simplified": "浮渭据泾",
+      "meaning": "长安有渭水流过，依傍泾水。"
+    },
+    {
+      "group": 106,
+      "simplified": "宫殿盘郁",
+      "meaning": "宫殿曲折重叠，气势雄伟。"
+    },
+    {
+      "group": 107,
+      "simplified": "楼观飞惊",
+      "meaning": "楼台高耸像要飞起，令人吃惊。"
+    },
+    {
+      "group": 108,
+      "simplified": "图写禽兽",
+      "meaning": "宫殿里画着飞禽走兽。"
+    },
+    {
+      "group": 109,
+      "simplified": "画彩仙灵",
+      "meaning": "还彩绘着神仙灵怪。"
+    },
+    {
+      "group": 110,
+      "simplified": "丙舍旁启",
+      "meaning": "配殿的门从侧面开着。"
+    },
+    {
+      "group": 111,
+      "simplified": "甲帐对楹",
+      "meaning": "华美的帐幕对着厅柱。"
+    },
+    {
+      "group": 112,
+      "simplified": "肆筵设席",
+      "meaning": "摆开宴席。"
+    },
+    {
+      "group": 113,
+      "simplified": "鼓瑟吹笙",
+      "meaning": "弹瑟吹笙，奏乐助兴。"
+    },
+    {
+      "group": 114,
+      "simplified": "升阶纳陛",
+      "meaning": "官员们登上台阶，进入殿堂。"
+    },
+    {
+      "group": 115,
+      "simplified": "弁转疑星",
+      "meaning": "帽上的珠玉晃动，好像满天星星。"
+    },
+    {
+      "group": 116,
+      "simplified": "右通广内",
+      "meaning": "右边通向广内殿（藏书处）。"
+    },
+    {
+      "group": 117,
+      "simplified": "左达承明",
+      "meaning": "左边通到承明殿（校书处）。"
+    },
+    {
+      "group": 118,
+      "simplified": "既集坟典",
+      "meaning": "这里收藏了古代典籍。"
+    },
+    {
+      "group": 119,
+      "simplified": "亦聚群英",
+      "meaning": "也聚集了众多英才。"
+    },
+    {
+      "group": 120,
+      "simplified": "杜稿钟隶",
+      "meaning": "有杜度的草书稿、钟繇的隶书。"
+    },
+    {
+      "group": 121,
+      "simplified": "漆书壁经",
+      "meaning": "还有漆写的古书和孔府墙壁里发现的经书。"
+    },
+    {
+      "group": 122,
+      "simplified": "府罗将相",
+      "meaning": "官府里将相排列。"
+    },
+    {
+      "group": 123,
+      "simplified": "路侠槐卿",
+      "meaning": "大路两旁是公卿大臣的府第。"
+    },
+    {
+      "group": 124,
+      "simplified": "户封八县",
+      "meaning": "每家封给八个县的税收。"
+    },
+    {
+      "group": 125,
+      "simplified": "家给千兵",
+      "meaning": "每家配给上千名兵士。"
+    },
+    {
+      "group": 126,
+      "simplified": "高冠陪辇",
+      "meaning": "他们戴着高帽，陪着皇帝的车驾。"
+    },
+    {
+      "group": 127,
+      "simplified": "驱毂振缨",
+      "meaning": "车子奔驰，帽带飘动。"
+    },
+    {
+      "group": 128,
+      "simplified": "世禄侈富",
+      "meaning": "世代享受俸禄，奢侈富足。"
+    },
+    {
+      "group": 129,
+      "simplified": "车驾肥轻",
+      "meaning": "车子轻快，马匹肥壮。"
+    },
+    {
+      "group": 130,
+      "simplified": "策功茂实",
+      "meaning": "记录功劳，褒奖实绩。"
+    },
+    {
+      "group": 131,
+      "simplified": "勒碑刻铭",
+      "meaning": "把功绩刻在石碑上流传。"
+    },
+    {
+      "group": 132,
+      "simplified": "磻溪伊尹",
+      "meaning": "在磻溪钓鱼的姜太公，还有伊尹。"
+    },
+    {
+      "group": 133,
+      "simplified": "佐时阿衡",
+      "meaning": "他们辅佐君王，伊尹被尊为“阿衡”（宰相）。"
+    },
+    {
+      "group": 134,
+      "simplified": "奄宅曲阜",
+      "meaning": "周公受封，定居曲阜。"
+    },
+    {
+      "group": 135,
+      "simplified": "微旦孰营",
+      "meaning": "没有周公旦，谁能把国家经营好？"
+    },
+    {
+      "group": 136,
+      "simplified": "桓公匡合",
+      "meaning": "齐桓公匡正天下，会合诸侯。"
+    },
+    {
+      "group": 137,
+      "simplified": "济弱扶倾",
+      "meaning": "救助弱小，扶持危难的国家。"
+    },
+    {
+      "group": 138,
+      "simplified": "绮回汉惠",
+      "meaning": "绮里季等人保住了汉惠帝的太子之位。"
+    },
+    {
+      "group": 139,
+      "simplified": "说感武丁",
+      "meaning": "傅说被商王武丁梦见，得到重用。"
+    },
+    {
+      "group": 140,
+      "simplified": "俊乂密勿",
+      "meaning": "贤才勤勉努力。"
+    },
+    {
+      "group": 141,
+      "simplified": "多士寔宁",
+      "meaning": "人才济济，国家才真正安宁。"
+    },
+    {
+      "group": 142,
+      "simplified": "晋楚更霸",
+      "meaning": "晋国和楚国轮流称霸。"
+    },
+    {
+      "group": 143,
+      "simplified": "赵魏困横",
+      "meaning": "赵国和魏国被“连横”之策所困。"
+    },
+    {
+      "group": 144,
+      "simplified": "假途灭虢",
+      "meaning": "晋国借道虞国，灭了虢国。"
+    },
+    {
+      "group": 145,
+      "simplified": "践土会盟",
+      "meaning": "晋文公在践土会盟诸侯。"
+    },
+    {
+      "group": 146,
+      "simplified": "何遵约法",
+      "meaning": "萧何遵循刘邦的“约法三章”。"
+    },
+    {
+      "group": 147,
+      "simplified": "韩弊烦刑",
+      "meaning": "韩非被繁苛的刑法所害。"
+    },
+    {
+      "group": 148,
+      "simplified": "起翦颇牧",
+      "meaning": "白起、王翦、廉颇、李牧四位名将。"
+    },
+    {
+      "group": 149,
+      "simplified": "用军最精",
+      "meaning": "用兵最为精通。"
+    },
+    {
+      "group": 150,
+      "simplified": "宣威沙漠",
+      "meaning": "他们的威名远扬到北方沙漠。"
+    },
+    {
+      "group": 151,
+      "simplified": "驰誉丹青",
+      "meaning": "美名被画像留在史册。"
+    },
+    {
+      "group": 152,
+      "simplified": "九州禹迹",
+      "meaning": "九州都留有大禹治水的足迹。"
+    },
+    {
+      "group": 153,
+      "simplified": "百郡秦并",
+      "meaning": "秦朝统一天下，设立郡县。"
+    },
+    {
+      "group": 154,
+      "simplified": "岳宗泰岱",
+      "meaning": "五岳以泰山为尊。"
+    },
+    {
+      "group": 155,
+      "simplified": "禅主云亭",
+      "meaning": "帝王封禅，多在云云山、亭亭山祭地。"
+    },
+    {
+      "group": 156,
+      "simplified": "雁门紫塞",
+      "meaning": "名关有雁门关，长城又叫紫塞。"
+    },
+    {
+      "group": 157,
+      "simplified": "鸡田赤城",
+      "meaning": "边地有鸡田驿，名山有赤城山。"
+    },
+    {
+      "group": 158,
+      "simplified": "昆池碣石",
+      "meaning": "名胜有昆明池、碣石山。"
+    },
+    {
+      "group": 159,
+      "simplified": "钜野洞庭",
+      "meaning": "还有钜野泽、洞庭湖。"
+    },
+    {
+      "group": 160,
+      "simplified": "旷远绵邈",
+      "meaning": "山河辽阔遥远，连绵不断。"
+    },
+    {
+      "group": 161,
+      "simplified": "岩岫杳冥",
+      "meaning": "山峰岩洞幽深昏暗。"
+    },
+    {
+      "group": 162,
+      "simplified": "治本于农",
+      "meaning": "治国的根本在于农业。"
+    },
+    {
+      "group": 163,
+      "simplified": "务兹稼穑",
+      "meaning": "要致力于播种和收获。"
+    },
+    {
+      "group": 164,
+      "simplified": "俶载南亩",
+      "meaning": "开春在向阳的田地上耕作。"
+    },
+    {
+      "group": 165,
+      "simplified": "我艺黍稷",
+      "meaning": "我种下黄米和小米。"
+    },
+    {
+      "group": 166,
+      "simplified": "税熟贡新",
+      "meaning": "庄稼熟了交税，献上新谷。"
+    },
+    {
+      "group": 167,
+      "simplified": "劝赏黜陟",
+      "meaning": "据此奖惩官员，该降的降，该升的升。"
+    },
+    {
+      "group": 168,
+      "simplified": "孟轲敦素",
+      "meaning": "孟子崇尚纯朴。"
+    },
+    {
+      "group": 169,
+      "simplified": "史鱼秉直",
+      "meaning": "史鱼秉性正直。"
+    },
+    {
+      "group": 170,
+      "simplified": "庶几中庸",
+      "meaning": "做人要力求中庸。"
+    },
+    {
+      "group": 171,
+      "simplified": "劳谦谨敕",
+      "meaning": "勤劳谦虚，谨慎自律。"
+    },
+    {
+      "group": 172,
+      "simplified": "聆音察理",
+      "meaning": "听别人说话，要体察其中道理。"
+    },
+    {
+      "group": 173,
+      "simplified": "鉴貌辨色",
+      "meaning": "看别人的神色，要分辨其中心意。"
+    },
+    {
+      "group": 174,
+      "simplified": "贻厥嘉猷",
+      "meaning": "给后人留下好的谋略。"
+    },
+    {
+      "group": 175,
+      "simplified": "勉其祗植",
+      "meaning": "勉励他们恭敬地立身。"
+    },
+    {
+      "group": 176,
+      "simplified": "省躬讥诫",
+      "meaning": "听到讥讽告诫，要反省自身。"
+    },
+    {
+      "group": 177,
+      "simplified": "宠增抗极",
+      "meaning": "受宠越多，越要警惕走向极端。"
+    },
+    {
+      "group": 178,
+      "simplified": "殆辱近耻",
+      "meaning": "眼看要受辱蒙羞时。"
+    },
+    {
+      "group": 179,
+      "simplified": "林皋幸即",
+      "meaning": "不如趁早退隐山林。"
+    },
+    {
+      "group": 180,
+      "simplified": "两疏见机",
+      "meaning": "汉代疏广、疏受叔侄看准时机。"
+    },
+    {
+      "group": 181,
+      "simplified": "解组谁逼",
+      "meaning": "主动辞官，谁逼过他们呢？"
+    },
+    {
+      "group": 182,
+      "simplified": "索居闲处",
+      "meaning": "独自居住，悠闲度日。"
+    },
+    {
+      "group": 183,
+      "simplified": "沉默寂寥",
+      "meaning": "不多说话，清静安宁。"
+    },
+    {
+      "group": 184,
+      "simplified": "求古寻论",
+      "meaning": "探求古人的学问。"
+    },
+    {
+      "group": 185,
+      "simplified": "散虑逍遥",
+      "meaning": "抛开烦恼，自在逍遥。"
+    },
+    {
+      "group": 186,
+      "simplified": "欣奏累遣",
+      "meaning": "欢乐来了，烦累就被赶走。"
+    },
+    {
+      "group": 187,
+      "simplified": "戚谢欢招",
+      "meaning": "忧愁消失，欢乐到来。"
+    },
+    {
+      "group": 188,
+      "simplified": "渠荷的历",
+      "meaning": "池塘里的荷花鲜艳明亮。"
+    },
+    {
+      "group": 189,
+      "simplified": "园莽抽条",
+      "meaning": "园中草木抽出新枝。"
+    },
+    {
+      "group": 190,
+      "simplified": "枇杷晚翠",
+      "meaning": "枇杷到了冬天依然翠绿。"
+    },
+    {
+      "group": 191,
+      "simplified": "梧桐蚤凋",
+      "meaning": "梧桐树叶很早就凋落（蚤，同“早”）。"
+    },
+    {
+      "group": 192,
+      "simplified": "陈根委翳",
+      "meaning": "老树根枯萎倒伏。"
+    },
+    {
+      "group": 193,
+      "simplified": "落叶飘摇",
+      "meaning": "落叶随风飘荡。"
+    },
+    {
+      "group": 194,
+      "simplified": "游鹍独运",
+      "meaning": "鹍鸟独自飞翔。"
+    },
+    {
+      "group": 195,
+      "simplified": "凌摩绛霄",
+      "meaning": "高飞直上彩霞满天的云霄。"
+    },
+    {
+      "group": 196,
+      "simplified": "耽读玩市",
+      "meaning": "王充爱读书，常在书市看书。"
+    },
+    {
+      "group": 197,
+      "simplified": "寓目囊箱",
+      "meaning": "看过的书像装进书袋书箱，过目不忘。"
+    },
+    {
+      "group": 198,
+      "simplified": "易輶攸畏",
+      "meaning": "说话轻率随便，最可怕。"
+    },
+    {
+      "group": 199,
+      "simplified": "属耳垣墙",
+      "meaning": "要提防隔墙有耳。"
+    },
+    {
+      "group": 200,
+      "simplified": "具膳餐饭",
+      "meaning": "准备饭菜用餐。"
+    },
+    {
+      "group": 201,
+      "simplified": "适口充肠",
+      "meaning": "合口味、能吃饱就好。"
+    },
+    {
+      "group": 202,
+      "simplified": "饱饫烹宰",
+      "meaning": "吃饱了，再好的鱼肉也不想吃。"
+    },
+    {
+      "group": 203,
+      "simplified": "饥厌糟糠",
+      "meaning": "饿了，粗粮也吃得满足。"
+    },
+    {
+      "group": 204,
+      "simplified": "亲戚故旧",
+      "meaning": "招待亲戚和老朋友。"
+    },
+    {
+      "group": 205,
+      "simplified": "老少异粮",
+      "meaning": "老人和孩子的饭食要不同。"
+    },
+    {
+      "group": 206,
+      "simplified": "妾御绩纺",
+      "meaning": "妻妾在家纺线织布。"
+    },
+    {
+      "group": 207,
+      "simplified": "侍巾帷房",
+      "meaning": "在内室侍奉起居。"
+    },
+    {
+      "group": 208,
+      "simplified": "纨扇圆洁",
+      "meaning": "绢制团扇圆润洁白。"
+    },
+    {
+      "group": 209,
+      "simplified": "银烛炜煌",
+      "meaning": "银色蜡烛明亮辉煌。"
+    },
+    {
+      "group": 210,
+      "simplified": "昼眠夕寐",
+      "meaning": "白天小憩，晚上安睡。"
+    },
+    {
+      "group": 211,
+      "simplified": "蓝笋象床",
+      "meaning": "有青竹席和象牙床。"
+    },
+    {
+      "group": 212,
+      "simplified": "弦歌酒宴",
+      "meaning": "奏乐唱歌，摆酒设宴。"
+    },
+    {
+      "group": 213,
+      "simplified": "接杯举觞",
+      "meaning": "互相接杯，举杯畅饮。"
+    },
+    {
+      "group": 214,
+      "simplified": "矫手顿足",
+      "meaning": "高兴得手舞足蹈。"
+    },
+    {
+      "group": 215,
+      "simplified": "悦豫且康",
+      "meaning": "快乐又安康。"
+    },
+    {
+      "group": 216,
+      "simplified": "嫡后嗣续",
+      "meaning": "嫡长子继承家业，传宗接代。"
+    },
+    {
+      "group": 217,
+      "simplified": "祭祀烝尝",
+      "meaning": "按时祭祀祖先，冬祭叫烝，秋祭叫尝。"
+    },
+    {
+      "group": 218,
+      "simplified": "稽颡再拜",
+      "meaning": "磕头叩拜，再三行礼。"
+    },
+    {
+      "group": 219,
+      "simplified": "悚惧恐惶",
+      "meaning": "心怀敬畏，诚惶诚恐。"
+    },
+    {
+      "group": 220,
+      "simplified": "笺牒简要",
+      "meaning": "书信要简明扼要。"
+    },
+    {
+      "group": 221,
+      "simplified": "顾答审详",
+      "meaning": "回答问题要周全详细。"
+    },
+    {
+      "group": 222,
+      "simplified": "骸垢想浴",
+      "meaning": "身上脏了就想洗澡。"
+    },
+    {
+      "group": 223,
+      "simplified": "执热愿凉",
+      "meaning": "手拿热东西就希望它凉。"
+    },
+    {
+      "group": 224,
+      "simplified": "驴骡犊特",
+      "meaning": "驴、骡、小牛、公牛。"
+    },
+    {
+      "group": 225,
+      "simplified": "骇跃超骧",
+      "meaning": "受惊时蹦跳奔腾。"
+    },
+    {
+      "group": 226,
+      "simplified": "诛斩贼盗",
+      "meaning": "惩办盗贼。"
+    },
+    {
+      "group": 227,
+      "simplified": "捕获叛亡",
+      "meaning": "抓捕叛乱逃亡的人。"
+    },
+    {
+      "group": 228,
+      "simplified": "布射僚丸",
+      "meaning": "吕布善射箭，熊宜僚善弄弹丸。"
+    },
+    {
+      "group": 229,
+      "simplified": "嵇琴阮啸",
+      "meaning": "嵇康善弹琴，阮籍善长啸。"
+    },
+    {
+      "group": 230,
+      "simplified": "恬笔伦纸",
+      "meaning": "蒙恬造毛笔，蔡伦造纸。"
+    },
+    {
+      "group": 231,
+      "simplified": "钧巧任钓",
+      "meaning": "马钧巧制器械，任公子善钓鱼。"
+    },
+    {
+      "group": 232,
+      "simplified": "释纷利俗",
+      "meaning": "他们的技艺解决难题，便利百姓。"
+    },
+    {
+      "group": 233,
+      "simplified": "并皆佳妙",
+      "meaning": "都非常高明巧妙。"
+    },
+    {
+      "group": 234,
+      "simplified": "毛施淑姿",
+      "meaning": "毛嫱、西施容貌美好。"
+    },
+    {
+      "group": 235,
+      "simplified": "工颦妍笑",
+      "meaning": "皱眉好看，笑起来更美。"
+    },
+    {
+      "group": 236,
+      "simplified": "年矢每催",
+      "meaning": "岁月像箭一样，总在催人老。"
+    },
+    {
+      "group": 237,
+      "simplified": "曦晖朗曜",
+      "meaning": "太阳的光辉明亮照耀。"
+    },
+    {
+      "group": 238,
+      "simplified": "璇玑悬斡",
+      "meaning": "北斗星高挂天空旋转。"
+    },
+    {
+      "group": 239,
+      "simplified": "晦魄环照",
+      "meaning": "月亮由暗到明，循环照耀。"
+    },
+    {
+      "group": 240,
+      "simplified": "指薪修祜",
+      "meaning": "像薪尽火传一样，修德积福，传承不断。"
+    },
+    {
+      "group": 241,
+      "simplified": "永绥吉劭",
+      "meaning": "永远平安，吉祥美好。"
+    },
+    {
+      "group": 242,
+      "simplified": "矩步引领",
+      "meaning": "走路步伐端正，抬头挺胸。"
+    },
+    {
+      "group": 243,
+      "simplified": "俯仰廊庙",
+      "meaning": "在朝堂上举止合乎礼仪。"
+    },
+    {
+      "group": 244,
+      "simplified": "束带矜庄",
+      "meaning": "衣带整齐，庄重严肃。"
+    },
+    {
+      "group": 245,
+      "simplified": "徘徊瞻眺",
+      "meaning": "走动和观望都要从容得体。"
+    },
+    {
+      "group": 246,
+      "simplified": "孤陋寡闻",
+      "meaning": "我学识浅陋，见闻不多。"
+    },
+    {
+      "group": 247,
+      "simplified": "愚蒙等诮",
+      "meaning": "和愚昧的人一样该被讥笑。"
+    },
+    {
+      "group": 248,
+      "simplified": "谓语助者",
+      "meaning": "文言里的语气助词。"
+    },
+    {
+      "group": 249,
+      "simplified": "焉哉乎也",
+      "meaning": "有焉、哉、乎、也这几个字。"
+    }
+  ],
   "characters": [
     {
       "index": 0,

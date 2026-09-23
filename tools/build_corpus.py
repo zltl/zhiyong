@@ -138,6 +138,18 @@ LINES = """
 ASSET_DIR = Path(__file__).resolve().parents[1] / "app" / "src" / "main" / "assets" / "glyphs" / "ogawa"
 FALLBACK_DIR = ASSET_DIR.parent / "guanzhong"
 FALLBACK_JSON = Path(__file__).resolve().parent / "ink_fallback.json"
+# 每行一句：简体原文、空格、释义。顺序与正文 250 句一致。
+VERSE_NOTES = Path(__file__).resolve().parent / "verse_notes.txt"
+
+
+def verse_notes() -> list[dict[str, str]]:
+    notes = []
+    for number, line in enumerate(VERSE_NOTES.read_text(encoding="utf-8").strip().splitlines(), start=1):
+        simplified, _, meaning = line.partition(" ")
+        if len(simplified) != 4 or not meaning.strip():
+            raise SystemExit(f"verse_notes.txt line {number}: need 4 simplified chars, a space, then the meaning")
+        notes.append({"simplified": simplified, "meaning": meaning.strip()})
+    return notes
 
 
 def fallback_kinds() -> dict[int, list[str]]:
@@ -180,6 +192,11 @@ def main() -> None:
     if dupes:
         raise SystemExit("duplicate characters: " + " ".join(dupes))
 
+    notes = verse_notes()
+    if len(notes) != 250:
+        raise SystemExit(f"expected 250 verse notes, got {len(notes)}")
+    verses = [{"group": group, **note} for group, note in enumerate(notes)]
+
     fallback = fallback_kinds()
     characters = []
     for index, char in enumerate(text):
@@ -196,9 +213,10 @@ def main() -> None:
         characters.append(entry)
 
     payload = {
-        "schema": 2,
+        "schema": 3,
         "note": "底帖默认小川本墨迹切图，每字另有关中本拓片可对照。",
         "fallbackNote": "小川本残缺处默认改用关中本拓片原色切图。",
+        "verses": verses,
         "characters": characters,
     }
     out = Path(__file__).resolve().parents[1] / "app" / "src" / "main" / "assets" / "corpus.json"

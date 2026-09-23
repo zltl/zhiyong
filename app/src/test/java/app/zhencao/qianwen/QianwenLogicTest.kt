@@ -1,6 +1,8 @@
 package app.zhencao.qianwen
 
 import app.zhencao.qianwen.model.CharacterEntry
+import app.zhencao.qianwen.ui.GlyphTurn
+import app.zhencao.qianwen.ui.glyphTurn
 import app.zhencao.qianwen.model.GlyphBook
 import app.zhencao.qianwen.model.ScriptStyle
 import app.zhencao.qianwen.model.parseScriptStyle
@@ -13,6 +15,16 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class QianwenLogicTest {
+    @Test
+    fun swipeUpOrRightSelectsTheNextGlyph() {
+        val threshold = 48f
+        assertEquals(GlyphTurn.Next, glyphTurn(0f, -80f, threshold))
+        assertEquals(GlyphTurn.Next, glyphTurn(80f, 10f, threshold))
+        assertEquals(GlyphTurn.Previous, glyphTurn(0f, 80f, threshold))
+        assertEquals(GlyphTurn.Previous, glyphTurn(-80f, -10f, threshold))
+        assertEquals(null, glyphTurn(20f, -20f, threshold))
+    }
+
     @Test
     fun shiftLabelNamesTheDirection() {
         assertTrue(shiftLabel(0.1f, -0.08f).contains("偏右"))
@@ -63,6 +75,18 @@ class QianwenLogicTest {
         assertEquals((0 until 1000).toList(), indexes)
         assertFalse(text.contains("caoStrokes"))
         assertFalse(text.contains("\"available\""))
+    }
+
+    @Test
+    fun everyVerseHasSimplifiedTextAndMeaning() {
+        val text = File("src/main/assets/corpus.json").readText()
+        val verse = Regex(""""group": (\d+),\s*"simplified": "([^"]*)",\s*"meaning": "([^"]*)"""")
+        val verses = verse.findAll(text).toList()
+        assertEquals((0 until 250).toList(), verses.map { it.groupValues[1].toInt() })
+        for (match in verses) {
+            assertEquals(match.value, 4, match.groupValues[2].length)
+            assertTrue(match.value, match.groupValues[3].isNotBlank())
+        }
     }
 
     @Test
