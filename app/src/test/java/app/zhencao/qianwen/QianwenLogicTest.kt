@@ -1,63 +1,29 @@
 package app.zhencao.qianwen
 
-import app.zhencao.qianwen.data.DailyPlanner
-import app.zhencao.qianwen.data.SvgPaths
-import app.zhencao.qianwen.model.Box
+import app.zhencao.qianwen.model.CharacterEntry
+import app.zhencao.qianwen.model.GlyphBook
 import app.zhencao.qianwen.model.ScriptStyle
-import app.zhencao.qianwen.model.iou
 import app.zhencao.qianwen.model.parseScriptStyle
 import app.zhencao.qianwen.model.shiftLabel
+import app.zhencao.qianwen.model.sizeLabel
 import java.io.File
-import java.time.LocalDate
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class QianwenLogicTest {
     @Test
-    fun cubicBoundsContainMidpoint() {
-        val ops = SvgPaths.parse("M 0 0 C 0 1 1 1 1 0")
-        val box = SvgPaths.bounds(ops)
-        assertNotNull(box)
-        assertTrue(box!!.left <= 0.01f)
-        assertTrue(box.right >= 0.99f)
-        assertTrue(box.bottom >= 0.7f)
-    }
-
-    @Test
-    fun identicalBoxesFullyOverlap() {
-        val box = Box(0f, 0f, 1f, 1f)
-        assertEquals(1f, iou(box, box), 0.001f)
-    }
-
-    @Test
-    fun disjointBoxesDoNotOverlap() {
-        val first = Box(0f, 0f, 0.2f, 0.2f)
-        val second = Box(0.8f, 0.8f, 1f, 1f)
-        assertEquals(0f, iou(first, second), 0.001f)
-    }
-
-    @Test
     fun shiftLabelNamesTheDirection() {
         assertTrue(shiftLabel(0.1f, -0.08f).contains("偏右"))
         assertTrue(shiftLabel(0.1f, -0.08f).contains("偏上"))
+        assertEquals("左右接近，上下接近", shiftLabel(0.01f, -0.01f))
     }
 
     @Test
-    fun dailyPlanStopsAtTheSampleEnd() {
-        assertEquals(listOf(0, 1, 2, 3), DailyPlanner.assign(40, 0, 4))
-        assertEquals(listOf(38, 39), DailyPlanner.assign(40, 38, 4))
-        assertTrue(DailyPlanner.assign(40, 40, 4).isEmpty())
-    }
-
-    @Test
-    fun newDayMovesTheCursorOnce() {
-        val today = LocalDate.of(2026, 9, 21)
-        assertEquals(0, DailyPlanner.nextCursor("", today, 0, 4))
-        assertEquals(0, DailyPlanner.nextCursor("2026-09-21", today, 0, 4))
-        assertEquals(4, DailyPlanner.nextCursor("2026-09-20", today, 0, 4))
-        assertEquals(8, DailyPlanner.nextCursor("2026-09-18", today, 4, 4))
+    fun sizeLabelNamesTheProportion() {
+        assertEquals("偏宽 20%，高度接近", sizeLabel(1.2f, 1.0f))
+        assertTrue(sizeLabel(1.0f, 0.8f).contains("偏矮"))
     }
 
     @Test
@@ -66,41 +32,37 @@ class QianwenLogicTest {
         assertEquals(null, parseScriptStyle("INK"))
         assertEquals(ScriptStyle.ZHEN, parseScriptStyle("ZHEN"))
         assertEquals(ScriptStyle.CAO, parseScriptStyle("CAO"))
-        assertEquals("zhen", ScriptStyle.ZHEN.glyphKind)
-        assertEquals("cao", ScriptStyle.CAO.glyphKind)
         assertEquals("真书", ScriptStyle.ZHEN.bookLabel)
         assertEquals("草书", ScriptStyle.CAO.bookLabel)
+    }
+
+    @Test
+    fun fallbackReplacesOnlyTheListedKinds() {
+        val entry = CharacterEntry(
+            index = 500,
+            char = "x",
+            group = 125,
+            ink = "glyphs/ogawa/500",
+            inkFallback = "glyphs/guanzhong/500",
+            inkFallbackKinds = setOf("cao"),
+        )
+        assertEquals("glyphs/guanzhong/500_cao.webp", entry.glyphAsset(ScriptStyle.CAO))
+        assertEquals("glyphs/ogawa/500_zhen.webp", entry.glyphAsset(ScriptStyle.ZHEN))
+        assertEquals("glyphs/ogawa/500_cao.webp", entry.glyphAsset(ScriptStyle.CAO, GlyphBook.OGAWA))
+        assertEquals("glyphs/guanzhong/500_zhen.webp", entry.glyphAsset(ScriptStyle.ZHEN, GlyphBook.GUANZHONG))
+        assertTrue(entry.usesFallback(ScriptStyle.CAO))
+        assertFalse(entry.usesFallback(ScriptStyle.ZHEN))
+        assertEquals(GlyphBook.GUANZHONG, entry.shownBook(ScriptStyle.CAO))
+        assertEquals(GlyphBook.OGAWA, entry.shownBook(ScriptStyle.ZHEN))
     }
 
     @Test
     fun corpusFileHasTheFullPracticeText() {
         val text = File("src/main/assets/corpus.json").readText()
         val indexes = Regex(""""index": (\d+)""").findAll(text).map { it.groupValues[1].toInt() }.toList()
-        assertEquals(1000, indexes.size)
         assertEquals((0 until 1000).toList(), indexes)
-        assertEquals(1000, Regex(""""available": true""").findAll(text).count())
-        assertEquals(0, Regex(""""available": false""").findAll(text).count())
-        val path = Regex(""""path": "([^"]+)"""").find(text)!!.groupValues[1]
-        assertTrue(SvgPaths.parse(path).isNotEmpty())
-        assertTrue(text.contains("草书底帖为小川本墨迹切图；笔顺仍是示意图。"))
-    }
-
-    @Test
-    fun ogawaPagesCoverOneThousandIndexes() {
-        fun range(page: Int): IntRange = when (page) {
-            2 -> 0 until 10
-            52 -> 990 until 1000
-            else -> {
-                val start = 10 + 20 * (page - 3)
-                start until (start + 20)
-            }
-        }
-        assertEquals(0 until 10, range(2))
-        assertEquals(10 until 30, range(3))
-        assertEquals(970 until 990, range(51))
-        assertEquals(990 until 1000, range(52))
-        val covered = (2..52).flatMap { range(it).toList() }
-        assertEquals((0 until 1000).toList(), covered)
+        assertFalse(text.contains("caoStrokes"))
+        assertFalse(text.contains("\"available\""))
     }
 
     @Test
@@ -124,10 +86,22 @@ class QianwenLogicTest {
         val text = File("src/main/assets/corpus.json").readText()
         val dir = File("src/main/assets/glyphs/ogawa")
         assertEquals(2000, dir.list().orEmpty().size)
-        assertEquals(0, Regex(""""ink": null""").findAll(text).count())
         for (index in 0 until 1000) {
             val stem = "glyphs/ogawa/%03d".format(index)
             assertTrue("missing ink stem $stem", text.contains(""""ink": "$stem""""))
+            assertTrue(File(dir, "%03d_zhen.webp".format(index)).isFile)
+            assertTrue(File(dir, "%03d_cao.webp".format(index)).isFile)
+        }
+    }
+
+    @Test
+    fun allCharactersHaveGuanzhongCrops() {
+        val text = File("src/main/assets/corpus.json").readText()
+        val dir = File("src/main/assets/glyphs/guanzhong")
+        assertEquals(2000, dir.list().orEmpty().size)
+        for (index in 0 until 1000) {
+            val stem = "glyphs/guanzhong/%03d".format(index)
+            assertTrue("missing rubbing stem $stem", text.contains(""""rubbing": "$stem""""))
             assertTrue(File(dir, "%03d_zhen.webp".format(index)).isFile)
             assertTrue(File(dir, "%03d_cao.webp".format(index)).isFile)
         }

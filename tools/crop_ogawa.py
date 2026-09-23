@@ -1,4 +1,9 @@
-"""Crop 真/草 glyphs from the Ogawa ink album of 智永真草千字文."""
+"""Crop 真/草 glyphs from the Ogawa ink album of 智永真草千字文.
+
+Source: 小川本墨迹 (京都小川家藏，日本国宝), full-album scans from 书法空间
+http://www.9610.com/zhy/moji.zip (index page http://www.9610.com/zhy/13.htm),
+unpacked into data/ogawa/pages/.
+"""
 
 from __future__ import annotations
 

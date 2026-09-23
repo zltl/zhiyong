@@ -38,7 +38,7 @@ fun ScriptPickerScreen(
         )
         ScriptChoiceCard(
             title = "草",
-            detail = "只看草书底帖，可看笔顺示意。",
+            detail = "只看草书底帖。",
             onClick = { onPick(ScriptStyle.CAO) },
         )
         Text(

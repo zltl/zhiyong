@@ -21,7 +21,6 @@ import app.zhencao.qianwen.model.ScriptStyle
 @Composable
 fun ProfileScreen(vm: AppViewModel, modifier: Modifier = Modifier) {
     val home by vm.home.collectAsState()
-    val settings = home.settings
     Column(
         modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 24.dp, vertical = 28.dp),
         verticalArrangement = Arrangement.spacedBy(14.dp),
@@ -30,39 +29,33 @@ fun ProfileScreen(vm: AppViewModel, modifier: Modifier = Modifier) {
         Text("智永真草千字文", color = MaterialTheme.colorScheme.onSurfaceVariant)
         SectionLabel("书体")
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            FilterChip(
-                selected = settings.script == ScriptStyle.ZHEN,
-                onClick = { vm.setScript(ScriptStyle.ZHEN) },
-                label = { Text("真书") },
-            )
-            FilterChip(
-                selected = settings.script == ScriptStyle.CAO,
-                onClick = { vm.setScript(ScriptStyle.CAO) },
-                label = { Text("草书") },
-            )
+            ScriptStyle.entries.forEach { script ->
+                FilterChip(
+                    selected = home.script == script,
+                    onClick = { vm.setScript(script) },
+                    label = { Text(script.bookLabel) },
+                )
+            }
         }
         Text(
-            "只显示所选书体。",
+            "只显示所选书体。临作按书体分开记录。",
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
-        SectionLabel("几个字")
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            FilterChip(
-                selected = settings.dailyCount == 4,
-                onClick = { vm.setDailyCount(4) },
-                label = { Text("4 字") },
-            )
-            FilterChip(
-                selected = settings.dailyCount == 8,
-                onClick = { vm.setDailyCount(8) },
-                label = { Text("8 字") },
-            )
-        }
+        SectionLabel("临作")
         Text(
-            "底帖用小川本墨迹切图；残缺的十一个字形由关中本拓片补，格内标「关中本补」。草书笔顺仍是示意图。",
+            "临作照片只存在本机，不上传。已临 ${home.counts.size} 字，共 ${home.counts.values.sum()} 次。",
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        SectionLabel("底帖来源")
+        SourceNote(
+            "墨迹 · 小川本",
+            "智永《真草千字文》墨迹，日本京都小川家藏（国宝）。图像取自书法空间（www.9610.com/zhy）刊布的全册扫描。本应用逐字裁切、缩放。",
+        )
+        SourceNote(
+            "拓本 · 关中本",
+            "《関中本真草千字文》，东京大学综合图书馆藏（A005940），据该馆数字档案 IIIF 公开图像，按其再利用条款署名。本应用逐字裁切，保持拓片原色。单字页可打开与小川本对照；小川本残缺的字形默认改用此本，格内标「关中本补」。",
         )
     }
 }
@@ -70,4 +63,14 @@ fun ProfileScreen(vm: AppViewModel, modifier: Modifier = Modifier) {
 @Composable
 private fun SectionLabel(text: String) {
     Text(text, style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(top = 10.dp))
+}
+
+@Composable
+private fun SourceNote(title: String, body: String) {
+    Text(title, style = MaterialTheme.typography.bodyMedium)
+    Text(
+        body,
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
 }

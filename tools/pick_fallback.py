@@ -7,12 +7,12 @@ strokes stays as the manuscript; no threshold separated the two, so the
 list is reviewed by eye on `fallback_ranked.jpg`, which ranks every glyph
 by how much of its ink box is torn paper or stain.
 
-Export: the rubbing is light strokes on black. For the ink edition it is
-inverted and toned with the paper and ink colours of the same character's
-小川本 glyph, so it sits quietly among the manuscript glyphs.
+Export: copy the 关中本 crops as-is (light strokes on black). Do not invert
+or recolour them.
 
-Writes tools/ink_fallback.json (read by build_corpus.py) and the toned
-glyphs to app/src/main/assets/glyphs/guanzhong/.
+Writes tools/ink_fallback.json (read by build_corpus.py). The full 关中本
+set lives in app/src/main/assets/glyphs/guanzhong/; this only refreshes
+the fallback crops and does not remove the others.
 """
 
 from __future__ import annotations
@@ -23,12 +23,11 @@ import shutil
 from pathlib import Path
 
 import numpy as np
-from PIL import Image, ImageDraw, ImageFilter, ImageFont
-from scipy import ndimage
+from PIL import Image, ImageDraw, ImageFont
 
 import crop_guanzhong
 import geom_crop
-from crop_ogawa import page_specs, save_webp
+from crop_ogawa import page_specs
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT_JSON = ROOT / "tools" / "ink_fallback.json"
@@ -100,40 +99,16 @@ def pick() -> list[dict]:
     return picks
 
 
-def toned_rubbing(index: int, kind: str) -> Image.Image:
-    """The rubbing glyph as dark ink on the 小川本 paper of the same character."""
-    img = Image.open(GZ_GLYPHS / f"{index:03d}_{kind}.webp").convert("L").filter(ImageFilter.MedianFilter(5))
-    rub = np.asarray(img).astype(np.float64)
-    ground = np.percentile(rub, 60)
-    stroke = np.percentile(rub, 98)
-    t = np.clip((rub - ground) / max(1.0, stroke - ground), 0.0, 1.0)
-    # stone grain leaves specks around the strokes; keep only stroke-sized ink
-    core = t > 0.35
-    labels, count = ndimage.label(core)
-    if count:
-        areas = ndimage.sum_labels(core, labels, np.arange(1, count + 1))
-        keep = np.isin(labels, 1 + np.where(areas >= 0.002 * core.size)[0])
-        near = ndimage.binary_dilation(keep, iterations=4)
-        t = t * ndimage.gaussian_filter(near.astype(np.float64), 1.5)
-    # stone grain frays the stroke edge; soften it, then firm the edge back up
-    t = ndimage.gaussian_filter(t, 2.0)
-    t = np.clip((t - 0.12) / 0.6, 0.0, 1.0)
-    t = t * t * (3.0 - 2.0 * t)
-    ref = np.asarray(Image.open(OGAWA_GLYPHS / f"{index:03d}_{kind}.webp").convert("RGB")).reshape(-1, 3)
-    grey = ref.mean(axis=1)
-    paper = np.median(ref[grey > np.percentile(grey, 60)], axis=0)
-    ink = np.array([38.0, 33.0, 28.0])
-    out = paper[None, None, :] * (1.0 - t[..., None]) + ink[None, None, :] * t[..., None]
-    return Image.fromarray(np.clip(out, 0, 255).astype(np.uint8))
-
-
 def export(picks: list[dict]) -> None:
-    if ASSET_DIR.exists():
-        shutil.rmtree(ASSET_DIR)
+    """Refresh the fallback crops. The rest of the 关中本 set stays in place."""
     ASSET_DIR.mkdir(parents=True, exist_ok=True)
     for p in picks:
-        save_webp(toned_rubbing(p["index"], p["kind"]), ASSET_DIR / f"{p['index']:03d}_{p['kind']}.webp")
-    print(f"exported {len(picks)} toned glyphs to {ASSET_DIR}")
+        name = f"{p['index']:03d}_{p['kind']}.webp"
+        src = GZ_GLYPHS / name
+        if not src.exists():
+            raise SystemExit(f"missing rubbing crop {src}")
+        shutil.copy2(src, ASSET_DIR / name)
+    print(f"refreshed {len(picks)} fallback glyphs in {ASSET_DIR}")
     write_sheet(
         [{"index": p["index"], "kind": p["kind"], "label": p["reason"]} for p in picks],
         DEBUG / "fallback_sheet.jpg",

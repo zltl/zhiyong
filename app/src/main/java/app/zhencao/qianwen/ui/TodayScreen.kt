@@ -5,7 +5,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
@@ -13,8 +12,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -24,13 +29,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import app.zhencao.qianwen.AppViewModel
-import app.zhencao.qianwen.TodayChar
-import app.zhencao.qianwen.model.Edition
+import app.zhencao.qianwen.data.VERSE_COUNT
+import app.zhencao.qianwen.model.CharacterEntry
 import app.zhencao.qianwen.model.ScriptStyle
 import app.zhencao.qianwen.ui.theme.PaperDeep
+import app.zhencao.qianwen.ui.theme.Zhu
 
 @Composable
 fun TodayScreen(
@@ -39,88 +46,70 @@ fun TodayScreen(
     onOpen: (Int) -> Unit,
 ) {
     val home by vm.home.collectAsState()
-    val script = home.settings.script ?: ScriptStyle.CAO
-    LazyColumn(
-        modifier.fillMaxSize(),
-        contentPadding = PaddingValues(horizontal = 24.dp, vertical = 28.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
+    val script = home.script ?: ScriptStyle.CAO
+    val verse = home.verse
+    val chars = vm.corpus.verse(verse)
+    Column(
+        modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .padding(horizontal = 24.dp, vertical = 28.dp),
     ) {
-        item {
-            Text("智永真草千字文", style = MaterialTheme.typography.headlineMedium)
-            val verse = home.today.firstOrNull()?.let { " · 第 ${it.group + 1} 句" }.orEmpty()
+        Text("智永真草千字文", style = MaterialTheme.typography.headlineMedium)
+        Text(
+            "接着写 · ${script.bookLabel} · 第 ${verse + 1} 句，共 $VERSE_COUNT 句",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(top = 6.dp, bottom = 20.dp),
+        )
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            IconButton(onClick = { vm.setVerse(verse - 1) }, enabled = verse > 0) {
+                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "上一句")
+            }
             Text(
-                "今日${script.bookLabel}$verse",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(top = 6.dp, bottom = 20.dp),
+                vm.corpus.groupText(verse).toList().joinToString("\u2002"),
+                style = MaterialTheme.typography.headlineSmall,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.weight(1f),
             )
+            IconButton(onClick = { vm.setVerse(verse + 1) }, enabled = verse < VERSE_COUNT - 1) {
+                Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = "下一句")
+            }
         }
-        when {
-            !home.ready -> item { QuietLine("正在准备。") }
-            home.sampleExhausted -> item { QuietLine("千字已经轮过一遍，可以从头再练。") }
-            home.today.isEmpty() -> item { QuietLine("字还在准备。") }
-            else -> {
-                val groups = home.today.groupBy { it.group }
-                groups.forEach { (group, chars) ->
-                    item(key = "group-$group") {
-                        VerseGroup(
-                            verse = vm.corpus.groupText(group),
-                            chars = chars,
-                            edition = home.settings.edition,
-                            script = script,
-                            vm = vm,
-                            onOpen = onOpen,
-                        )
-                    }
+        Spacer(Modifier.height(16.dp))
+        chars.chunked(2).forEach { pair ->
+            Row(
+                Modifier.fillMaxWidth().padding(bottom = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+            ) {
+                pair.forEach { entry ->
+                    GlyphTile(
+                        entry = entry,
+                        script = script,
+                        count = home.counts[entry.index] ?: 0,
+                        modifier = Modifier.weight(1f),
+                        onClick = { onOpen(entry.index) },
+                    )
                 }
             }
         }
-    }
-}
-
-@Composable
-private fun QuietLine(text: String) {
-    Text(text, color = MaterialTheme.colorScheme.onSurfaceVariant)
-}
-
-@Composable
-private fun VerseGroup(
-    verse: String,
-    chars: List<TodayChar>,
-    edition: Edition,
-    script: ScriptStyle,
-    vm: AppViewModel,
-    onOpen: (Int) -> Unit,
-) {
-    Column(Modifier.padding(bottom = 24.dp)) {
         Text(
-            verse.toList().joinToString("\u2002"),
-            style = MaterialTheme.typography.titleMedium,
+            "先在纸上写完这一句，再点字拍照。一张纸可以连着框几个字。",
+            style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(bottom = 14.dp),
         )
-        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            chars.forEach { char ->
-                GlyphTile(
-                    char = char,
-                    asset = vm.corpus[char.index].glyphAsset(edition, script),
-                    modifier = Modifier.weight(1f),
-                    onClick = { onOpen(char.index) },
-                )
-            }
-            repeat(4 - chars.size) { Spacer(Modifier.weight(1f)) }
-        }
     }
 }
 
 @Composable
 private fun GlyphTile(
-    char: TodayChar,
-    asset: String?,
+    entry: CharacterEntry,
+    script: ScriptStyle,
+    count: Int,
     modifier: Modifier,
     onClick: () -> Unit,
 ) {
-    val photo = rememberGlyphBitmap(asset)
+    val photo = rememberGlyphBitmap(entry.glyphAsset(script))
     Column(
         modifier.clickable(onClick = onClick),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -132,14 +121,22 @@ private fun GlyphTile(
                 .clip(RoundedCornerShape(10.dp))
                 .background(PaperDeep),
         ) {
-            if (photo != null) drawGlyphPhoto(photo, invert = false)
+            if (photo != null) drawFitted(photo)
         }
-        Spacer(Modifier.height(8.dp))
-        Text(
-            char.char,
-            fontFamily = FontFamily.Serif,
-            fontSize = 15.sp,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
+        Row(
+            Modifier.padding(top = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            Text(
+                entry.char,
+                fontFamily = FontFamily.Serif,
+                fontSize = 15.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            if (count > 0) {
+                Text("临 $count", fontSize = 12.sp, color = Zhu)
+            }
+        }
     }
 }

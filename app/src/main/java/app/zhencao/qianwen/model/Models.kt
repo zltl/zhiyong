@@ -1,7 +1,5 @@
 package app.zhencao.qianwen.model
 
-enum class Edition { INK, RUBBING }
-
 enum class ScriptStyle {
     ZHEN,
     CAO,
@@ -31,102 +29,39 @@ fun parseScriptStyle(raw: String?): ScriptStyle? {
     return runCatching { ScriptStyle.valueOf(raw) }.getOrNull()
 }
 
-enum class GridType { NONE, MI, JIU, HUI }
-
-enum class LayoutMode { SIDE, STACK }
-
-enum class StrokeKind { SOLID, SILK }
-
-enum class StudioMode { COMPARE, STROKE, WRITE, OVERLAY }
-
-enum class QuizKind { RECOGNIZE_CAO, PICK_CAO }
-
-data class GlyphStroke(
-    val order: Int,
-    val kind: StrokeKind,
-    val path: String,
-)
+enum class GlyphBook(val label: String) {
+    OGAWA("小川本"),
+    GUANZHONG("关中本"),
+}
 
 data class CharacterEntry(
     val index: Int,
     val char: String,
     val group: Int,
-    val slot: Int,
-    val available: Boolean,
-    val ink: String?,
-    val rubbing: String?,
-    val caoStrokes: List<GlyphStroke>,
+    val ink: String,
+    /** Stem of the 关中本 crops for this character. */
+    val rubbing: String = "glyphs/guanzhong/%03d".format(index),
     /** Stem of 关中本 glyphs standing in for lost or damaged 小川本 ones. */
     val inkFallback: String? = null,
-    /** Glyph kinds ("zhen", "cao") that the ink edition takes from [inkFallback]. */
+    /** Glyph kinds ("zhen", "cao") taken from [inkFallback]. */
     val inkFallbackKinds: Set<String> = emptySet(),
 ) {
-    fun glyphStem(edition: Edition): String? = when (edition) {
-        Edition.INK -> ink
-        Edition.RUBBING -> rubbing
+    fun usesFallback(script: ScriptStyle): Boolean =
+        inkFallback != null && script.glyphKind in inkFallbackKinds
+
+    /** The edition shown until the reader opens the other one. */
+    fun shownBook(script: ScriptStyle): GlyphBook =
+        if (usesFallback(script)) GlyphBook.GUANZHONG else GlyphBook.OGAWA
+
+    fun glyphAsset(script: ScriptStyle): String = glyphAsset(script, shownBook(script))
+
+    fun glyphAsset(script: ScriptStyle, book: GlyphBook): String {
+        val stem = when (book) {
+            GlyphBook.OGAWA -> ink
+            GlyphBook.GUANZHONG -> rubbing
+        }
+        return "${stem}_${script.glyphKind}.webp"
     }
-
-    fun usesFallback(edition: Edition, kind: String): Boolean =
-        edition == Edition.INK && inkFallback != null && kind in inkFallbackKinds
-
-    fun glyphAsset(edition: Edition, kind: String): String? {
-        val stem = if (usesFallback(edition, kind)) inkFallback else glyphStem(edition)
-        return stem?.let { "${it}_${kind}.webp" }
-    }
-
-    fun glyphAsset(edition: Edition, script: ScriptStyle): String? = glyphAsset(edition, script.glyphKind)
-}
-
-data class InkPoint(
-    val x: Float,
-    val y: Float,
-    val pressure: Float,
-)
-
-data class InkStroke(
-    val points: List<InkPoint>,
-)
-
-data class QuizQuestion(
-    val kind: QuizKind,
-    val answerIndex: Int,
-    val options: List<Int>,
-)
-
-data class Box(
-    val left: Float,
-    val top: Float,
-    val right: Float,
-    val bottom: Float,
-) {
-    val width: Float get() = (right - left).coerceAtLeast(0f)
-    val height: Float get() = (bottom - top).coerceAtLeast(0f)
-    val centerX: Float get() = (left + right) / 2f
-    val centerY: Float get() = (top + bottom) / 2f
-
-    fun area(): Float = width * height
-}
-
-fun iou(first: Box, second: Box): Float {
-    val left = maxOf(first.left, second.left)
-    val top = maxOf(first.top, second.top)
-    val right = minOf(first.right, second.right)
-    val bottom = minOf(first.bottom, second.bottom)
-    val overlap = (right - left).coerceAtLeast(0f) * (bottom - top).coerceAtLeast(0f)
-    val union = first.area() + second.area() - overlap
-    if (union <= 0f) return 0f
-    return overlap / union
-}
-
-fun inkBox(strokes: List<InkStroke>): Box? {
-    val points = strokes.flatMap { it.points }
-    if (points.isEmpty()) return null
-    return Box(
-        left = points.minOf { it.x },
-        top = points.minOf { it.y },
-        right = points.maxOf { it.x },
-        bottom = points.maxOf { it.y },
-    )
 }
 
 fun shiftLabel(dx: Float, dy: Float): String {
@@ -141,6 +76,15 @@ fun shiftLabel(dx: Float, dy: Float): String {
         else -> "上下接近"
     }
     return "$horizontal，$vertical"
+}
+
+fun sizeLabel(widthRatio: Float, heightRatio: Float): String {
+    fun part(ratio: Float, big: String, small: String, near: String) = when {
+        ratio > 1.08f -> "$big ${percent(ratio - 1f)}"
+        ratio < 0.92f -> "$small ${percent(1f - ratio)}"
+        else -> near
+    }
+    return "${part(widthRatio, "偏宽", "偏窄", "宽度接近")}，${part(heightRatio, "偏高", "偏矮", "高度接近")}"
 }
 
 private fun percent(value: Float): String = "${(value * 100).toInt()}%"

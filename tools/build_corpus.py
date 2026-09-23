@@ -135,39 +135,6 @@ LINES = """
 """.strip().splitlines()
 
 
-def clamp(value: float) -> float:
-    return max(0.08, min(0.92, value))
-
-
-def strokes_for(char: str) -> list[dict]:
-    """Connected schematic curves. Not a transcription of Zhiyong's cursive."""
-    seed = sum(ord(char) * (i + 3) for i in range(1))
-    count = 3 + (seed % 3)
-    x = clamp(0.66 + ((seed >> 3) % 9) / 100)
-    y = clamp(0.16 + ((seed >> 1) % 7) / 100)
-    strokes = []
-    for i in range(count):
-        bend = ((seed >> (i + 2)) % 17 - 8) / 100
-        dx = -0.16 - ((seed >> (i + 4)) % 9) / 100
-        dy = 0.15 + ((seed >> (i + 1)) % 8) / 100
-        if i % 2 == 1:
-            dx = -dx * 0.55
-        x2 = clamp(x + dx)
-        y2 = clamp(y + dy)
-        c1x = clamp(x + bend)
-        c1y = clamp(y + dy * 0.35)
-        c2x = clamp(x2 - bend * 0.8)
-        c2y = clamp(y2 - dy * 0.25)
-        kind = "silk" if i == count - 2 else "solid"
-        path = (
-            f"M {x:.3f} {y:.3f} "
-            f"C {c1x:.3f} {c1y:.3f} {c2x:.3f} {c2y:.3f} {x2:.3f} {y2:.3f}"
-        )
-        strokes.append({"order": i + 1, "kind": kind, "path": path})
-        x, y = x2, y2
-    return strokes
-
-
 ASSET_DIR = Path(__file__).resolve().parents[1] / "app" / "src" / "main" / "assets" / "glyphs" / "ogawa"
 FALLBACK_DIR = ASSET_DIR.parent / "guanzhong"
 FALLBACK_JSON = Path(__file__).resolve().parent / "ink_fallback.json"
@@ -186,13 +153,18 @@ def fallback_kinds() -> dict[int, list[str]]:
     return {index: sorted(kinds, reverse=True) for index, kinds in out.items()}
 
 
-def ink_stem(index: int) -> str | None:
-    stem = f"glyphs/ogawa/{index:03d}"
-    cao = ASSET_DIR / f"{index:03d}_cao.webp"
-    zhen = ASSET_DIR / f"{index:03d}_zhen.webp"
-    if cao.exists() and zhen.exists():
-        return stem
-    return None
+def ink_stem(index: int) -> str:
+    for kind in ("zhen", "cao"):
+        if not (ASSET_DIR / f"{index:03d}_{kind}.webp").exists():
+            raise SystemExit(f"missing ogawa glyph {index:03d}_{kind}; run crop_ogawa.py")
+    return f"glyphs/ogawa/{index:03d}"
+
+
+def rubbing_stem(index: int) -> str:
+    for kind in ("zhen", "cao"):
+        if not (FALLBACK_DIR / f"{index:03d}_{kind}.webp").exists():
+            raise SystemExit(f"missing guanzhong glyph {index:03d}_{kind}; run crop_guanzhong.py")
+    return f"glyphs/guanzhong/{index:03d}"
 
 
 def main() -> None:
@@ -210,21 +182,13 @@ def main() -> None:
 
     fallback = fallback_kinds()
     characters = []
-    inked = 0
     for index, char in enumerate(text):
-        stem = ink_stem(index)
-        available = stem is not None
-        if stem:
-            inked += 1
         entry = {
             "index": index,
             "char": char,
             "group": index // 4,
-            "slot": index % 4,
-            "available": available,
-            "ink": stem,
-            "rubbing": None,
-            "caoStrokes": strokes_for(char) if available else [],
+            "ink": ink_stem(index),
+            "rubbing": rubbing_stem(index),
         }
         if index in fallback:
             entry["inkFallback"] = f"glyphs/guanzhong/{index:03d}"
@@ -232,17 +196,16 @@ def main() -> None:
         characters.append(entry)
 
     payload = {
-        "schema": 1,
-        "placeholderGlyphs": False,
-        "note": "草书底帖为小川本墨迹切图；笔顺仍是示意图。",
-        "fallbackNote": "小川本残缺处由关中本拓片补，反相后按小川本纸色调色。",
+        "schema": 2,
+        "note": "底帖默认小川本墨迹切图，每字另有关中本拓片可对照。",
+        "fallbackNote": "小川本残缺处默认改用关中本拓片原色切图。",
         "characters": characters,
     }
     out = Path(__file__).resolve().parents[1] / "app" / "src" / "main" / "assets" / "corpus.json"
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
     patched = sum(len(k) for k in fallback.values())
-    print(f"wrote {out} chars={len(characters)} available={inked} ink={inked} fallback={patched}")
+    print(f"wrote {out} chars={len(characters)} fallback={patched}")
 
 
 if __name__ == "__main__":

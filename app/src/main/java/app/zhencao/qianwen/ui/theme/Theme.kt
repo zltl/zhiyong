@@ -19,6 +19,12 @@ val Moss = Color(0xFF5E7361)
 val Mist = Color(0xFF8C8276)
 val Hairline = Color(0xFFDCD2C1)
 
+/** Overlay colours: the model in 朱, the practice in 墨, strokes the practice adds in 青. */
+val Zhu = Color(0xFFC4452F)
+val Qing = Color(0xFF2F6F8F)
+val GridRed = Color(0xFFC46A5A)
+val SheetPaper = Color(0xFFF7F1E6)
+
 // Every container Material would tint lavender is set to a paper tone.
 private val Colors = lightColorScheme(
     primary = Cinnabar,
