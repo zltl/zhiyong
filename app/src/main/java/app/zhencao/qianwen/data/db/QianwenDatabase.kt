@@ -10,7 +10,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
         SettingsEntity::class,
         PracticeEntity::class,
     ],
-    version = 3,
+    version = 4,
     exportSchema = false,
 )
 abstract class QianwenDatabase : RoomDatabase() {
@@ -45,6 +45,12 @@ abstract class QianwenDatabase : RoomDatabase() {
                         "overlap REAL NOT NULL, dx REAL NOT NULL, dy REAL NOT NULL)",
                 )
                 db.execSQL("CREATE INDEX index_practices_charIndex ON practices (charIndex)")
+            }
+        }
+
+        val MIGRATION_3_4 = object : Migration(3, 4) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE settings ADD COLUMN grid TEXT NOT NULL DEFAULT 'MI'")
             }
         }
     }

@@ -49,6 +49,7 @@ import app.zhencao.qianwen.data.maskOf
 import app.zhencao.qianwen.data.renderCrop
 import app.zhencao.qianwen.data.toMatrix
 import app.zhencao.qianwen.model.ScriptStyle
+import app.zhencao.qianwen.ui.theme.GridRed
 import app.zhencao.qianwen.ui.theme.Zhu
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -151,6 +152,7 @@ fun CropScreen(
                             ghostPaint,
                         )
                     }
+                    drawPracticeGrid(home.grid, width = side, height = side, border = false, color = GridRed, alpha = 0.85f)
                 }
             }
         }

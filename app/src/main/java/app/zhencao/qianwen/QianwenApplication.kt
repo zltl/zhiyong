@@ -19,6 +19,10 @@ class QianwenApplication : Application() {
             this,
             QianwenDatabase::class.java,
             "qianwen.db",
-        ).addMigrations(QianwenDatabase.MIGRATION_1_2, QianwenDatabase.MIGRATION_2_3).build()
+        ).addMigrations(
+            QianwenDatabase.MIGRATION_1_2,
+            QianwenDatabase.MIGRATION_2_3,
+            QianwenDatabase.MIGRATION_3_4,
+        ).build()
     }
 }

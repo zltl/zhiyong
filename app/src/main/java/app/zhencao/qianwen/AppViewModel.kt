@@ -19,7 +19,9 @@ import app.zhencao.qianwen.data.db.PracticeEntity
 import app.zhencao.qianwen.data.db.QianwenDao
 import app.zhencao.qianwen.data.db.SettingsEntity
 import app.zhencao.qianwen.data.maskOf
+import app.zhencao.qianwen.model.PracticeGrid
 import app.zhencao.qianwen.model.ScriptStyle
+import app.zhencao.qianwen.model.parsePracticeGrid
 import app.zhencao.qianwen.model.parseScriptStyle
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -41,6 +43,7 @@ data class HomeState(
     val ready: Boolean = false,
     val script: ScriptStyle? = null,
     val verse: Int = 0,
+    val grid: PracticeGrid = PracticeGrid.MI,
     /** Practice count per character index, for the chosen script. */
     val counts: Map<Int, Int> = emptyMap(),
 )
@@ -79,6 +82,7 @@ class AppViewModel(
                 ready = true,
                 script = script,
                 verse = entity.verse.coerceIn(0, VERSE_COUNT - 1),
+                grid = parsePracticeGrid(entity.grid),
                 counts = counts.associate { it.charIndex to it.count },
             )
         }
@@ -96,6 +100,8 @@ class AppViewModel(
     fun setVerse(verse: Int) = updateSettings { it.copy(verse = verse.coerceIn(0, VERSE_COUNT - 1)) }
 
     fun setScript(script: ScriptStyle) = updateSettings { it.copy(script = script.name) }
+
+    fun setGrid(grid: PracticeGrid) = updateSettings { it.copy(grid = grid.name) }
 
     fun practices(charIndex: Int, script: ScriptStyle): Flow<List<PracticeEntity>> =
         dao.observePractices(charIndex, script.name)

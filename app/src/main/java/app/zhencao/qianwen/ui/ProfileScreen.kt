@@ -37,6 +37,8 @@ fun ProfileScreen(vm: AppViewModel, modifier: Modifier = Modifier) {
                 )
             }
         }
+        SectionLabel("练习格")
+        PracticeGridPicker(home.grid, vm::setGrid)
         SectionLabel("临作")
         Text(
             "已临 ${home.counts.size} 字，共 ${home.counts.values.sum()} 次。",

@@ -38,6 +38,7 @@ import app.zhencao.qianwen.AppViewModel
 import app.zhencao.qianwen.data.diffBitmap
 import app.zhencao.qianwen.data.inkBitmap
 import app.zhencao.qianwen.data.db.PracticeEntity
+import app.zhencao.qianwen.model.PracticeGrid
 import app.zhencao.qianwen.model.parseScriptStyle
 import app.zhencao.qianwen.model.shiftLabel
 import app.zhencao.qianwen.model.sizeLabel
@@ -72,6 +73,7 @@ fun CompareScreen(
 ) {
     KeepScreenOn()
     val practice by remember(id) { vm.practice(id) }.collectAsState(null)
+    val home by vm.home.collectAsState()
     val sheet by vm.sheet.collectAsState()
     val record = practice
     if (record == null) {
@@ -120,7 +122,7 @@ fun CompareScreen(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         } else {
-            ComparePanel(ready, mode, opacity, script?.let { entry.glyphAsset(it) })
+            ComparePanel(ready, mode, opacity, script?.let { entry.glyphAsset(it) }, home.grid)
             when (mode) {
                 CompareMode.OVERLAY -> {
                     Text("临作 ${(opacity * 100).roundToInt()}%")
@@ -154,16 +156,22 @@ fun CompareScreen(
 }
 
 @Composable
-private fun ComparePanel(images: CompareImages, mode: CompareMode, opacity: Float, modelAsset: String?) {
+private fun ComparePanel(
+    images: CompareImages,
+    mode: CompareMode,
+    opacity: Float,
+    modelAsset: String?,
+    grid: PracticeGrid,
+) {
     when (mode) {
         CompareMode.OVERLAY -> GlyphFrame("", squareModifier()) {
-            drawMiGrid()
             drawFitted(images.model, alpha = 0.7f)
             drawFitted(images.user, alpha = opacity)
+            drawPracticeGrid(grid)
         }
         CompareMode.DIFF -> GlyphFrame("", squareModifier()) {
-            drawMiGrid()
             drawFitted(images.diff)
+            drawPracticeGrid(grid)
         }
         CompareMode.SIDE -> BoxWithConstraints(Modifier.fillMaxWidth()) {
             val cell = (maxWidth - 8.dp) / 2
@@ -171,9 +179,11 @@ private fun ComparePanel(images: CompareImages, mode: CompareMode, opacity: Floa
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 GlyphFrame("底帖", Modifier.size(cell).clip(RoundedCornerShape(10.dp))) {
                     modelPhoto?.let { drawFitted(it) }
+                    drawPracticeGrid(grid)
                 }
                 GlyphFrame("临作", Modifier.size(cell).clip(RoundedCornerShape(10.dp))) {
                     drawFitted(images.crop)
+                    drawPracticeGrid(grid)
                 }
             }
         }

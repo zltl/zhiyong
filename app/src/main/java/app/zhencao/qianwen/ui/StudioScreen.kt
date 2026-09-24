@@ -67,6 +67,7 @@ import app.zhencao.qianwen.data.Corpus
 import app.zhencao.qianwen.data.db.PracticeEntity
 import app.zhencao.qianwen.model.CharacterEntry
 import app.zhencao.qianwen.model.GlyphBook
+import app.zhencao.qianwen.model.PracticeGrid
 import app.zhencao.qianwen.model.ScriptStyle
 import app.zhencao.qianwen.ui.theme.PaperDeep
 import app.zhencao.qianwen.ui.theme.Zhu
@@ -134,6 +135,7 @@ fun StudioScreen(
             script,
             compare,
             otherBook,
+            home.grid,
             modifier = Modifier.weight(1f).fillMaxWidth(),
         )
         PracticeStrip(vm, practices, onOpenPractice)
@@ -201,6 +203,7 @@ private fun ModelView(
     script: ScriptStyle,
     compare: Boolean,
     otherBook: GlyphBook,
+    grid: PracticeGrid,
     modifier: Modifier,
 ) {
     var scale by remember(pager.shown) { mutableFloatStateOf(1f) }
@@ -240,6 +243,7 @@ private fun ModelView(
                     script,
                     compare,
                     otherBook,
+                    grid,
                     Modifier.fillMaxSize().graphicsLayer {
                         val place = incomingOffset(
                             pager.slide,
@@ -259,6 +263,7 @@ private fun ModelView(
                 script,
                 compare,
                 otherBook,
+                grid,
                 Modifier.fillMaxSize().graphicsLayer {
                     scaleX = pageScale
                     scaleY = pageScale
@@ -290,6 +295,7 @@ private fun GlyphPage(
     script: ScriptStyle,
     compare: Boolean,
     otherBook: GlyphBook,
+    grid: PracticeGrid,
     modifier: Modifier,
 ) {
     if (compare) {
@@ -299,8 +305,8 @@ private fun GlyphPage(
                 Modifier.align(Alignment.Center),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                EditionFrame(entry, script, entry.shownBook(script), Modifier.size(cell))
-                EditionFrame(entry, script, otherBook, Modifier.size(cell))
+                EditionFrame(entry, script, entry.shownBook(script), grid, Modifier.size(cell))
+                EditionFrame(entry, script, otherBook, grid, Modifier.size(cell))
             }
         }
         return
@@ -314,6 +320,7 @@ private fun GlyphPage(
             Modifier.align(Alignment.Center).size(cell).clip(RoundedCornerShape(14.dp)),
         ) {
             if (photo != null) drawFitted(photo)
+            drawPracticeGrid(grid)
         }
     }
 }
@@ -323,11 +330,13 @@ private fun EditionFrame(
     entry: CharacterEntry,
     script: ScriptStyle,
     book: GlyphBook,
+    grid: PracticeGrid,
     modifier: Modifier,
 ) {
     val photo = rememberGlyphBitmap(entry.glyphAsset(script, book))
     GlyphFrame(frameLabel(entry, script, book), modifier.clip(RoundedCornerShape(14.dp))) {
         if (photo != null) drawFitted(photo)
+        drawPracticeGrid(grid)
     }
 }
 

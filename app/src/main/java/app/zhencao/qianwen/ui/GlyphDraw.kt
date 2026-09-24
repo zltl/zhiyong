@@ -6,9 +6,14 @@ import android.graphics.Paint
 import android.view.View
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -16,10 +21,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.nativeCanvas
@@ -27,6 +35,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import app.zhencao.qianwen.model.PracticeGrid
+import app.zhencao.qianwen.model.practiceGridGeometry
 import app.zhencao.qianwen.ui.theme.GridRed
 import app.zhencao.qianwen.ui.theme.Ink
 import app.zhencao.qianwen.ui.theme.SheetPaper
@@ -75,15 +85,50 @@ fun DrawScope.drawFitted(bitmap: ImageBitmap, alpha: Float = 1f) {
     drawContext.canvas.nativeCanvas.drawBitmap(bitmap.asAndroidBitmap(), null, dest, paint)
 }
 
-fun DrawScope.drawMiGrid(color: Color = GridRed) {
-    val line = color.copy(alpha = 0.5f)
-    drawRect(line, style = Stroke(width = 2f))
-    val w = size.width
-    val h = size.height
-    drawLine(line, Offset(w / 2f, 0f), Offset(w / 2f, h), strokeWidth = 1.5f)
-    drawLine(line, Offset(0f, h / 2f), Offset(w, h / 2f), strokeWidth = 1.5f)
-    drawLine(line, Offset.Zero, Offset(w, h), strokeWidth = 1f)
-    drawLine(line, Offset(w, 0f), Offset(0f, h), strokeWidth = 1f)
+fun DrawScope.drawPracticeGrid(
+    kind: PracticeGrid,
+    width: Float = size.width,
+    height: Float = size.height,
+    border: Boolean = true,
+    color: Color = GridRed,
+    alpha: Float = 0.72f,
+) {
+    val ink = color.copy(alpha = alpha)
+    val unit = 1.dp.toPx()
+    val geometry = practiceGridGeometry(kind, width, height, border)
+    geometry.boxes.forEach { box ->
+        drawRect(
+            ink,
+            topLeft = Offset(box.left, box.top),
+            size = Size(box.right - box.left, box.bottom - box.top),
+            style = Stroke(width = box.width * unit, cap = StrokeCap.Round, join = StrokeJoin.Round),
+        )
+    }
+    geometry.lines.forEach { line ->
+        drawLine(
+            ink,
+            Offset(line.startX, line.startY),
+            Offset(line.endX, line.endY),
+            strokeWidth = line.width * unit,
+            cap = StrokeCap.Round,
+        )
+    }
+}
+
+@Composable
+fun PracticeGridPicker(selected: PracticeGrid, onSelect: (PracticeGrid) -> Unit) {
+    Row(
+        Modifier.horizontalScroll(rememberScrollState()),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        PracticeGrid.entries.forEach { item ->
+            FilterChip(
+                selected = selected == item,
+                onClick = { onSelect(item) },
+                label = { Text(item.label) },
+            )
+        }
+    }
 }
 
 @Composable

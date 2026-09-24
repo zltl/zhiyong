@@ -14,6 +14,8 @@ data class SettingsEntity(
     @PrimaryKey val id: Int = 1,
     val script: String = "",
     val verse: Int = 0,
+    /** [app.zhencao.qianwen.model.PracticeGrid] name. */
+    val grid: String = "MI",
 )
 
 @Entity(tableName = "practices", indices = [Index("charIndex")])
