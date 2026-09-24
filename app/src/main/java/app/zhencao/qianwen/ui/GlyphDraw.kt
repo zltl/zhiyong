@@ -32,8 +32,8 @@ import app.zhencao.qianwen.ui.theme.Ink
 import app.zhencao.qianwen.ui.theme.SheetPaper
 import kotlin.math.roundToInt
 
-private val glyphBitmapCache = object : LinkedHashMap<String, ImageBitmap?>(64, 0.75f, true) {
-    override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, ImageBitmap?>?): Boolean = size > 80
+private val glyphBitmapCache = object : LinkedHashMap<String, ImageBitmap?>(128, 0.75f, true) {
+    override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, ImageBitmap?>?): Boolean = size > 240
 }
 
 fun loadGlyphBitmap(context: Context, asset: String?): ImageBitmap? {

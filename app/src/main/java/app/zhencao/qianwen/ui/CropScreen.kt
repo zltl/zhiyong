@@ -72,7 +72,7 @@ fun CropScreen(
     if (current == null) {
         Column(Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             TextButton(onClick = onBack) { Text("返回") }
-            Text("还没有临作照片。先拍一张，或从相册选。")
+            Text("还没有临作照片。")
         }
         return
     }
@@ -104,12 +104,6 @@ fun CropScreen(
                 label = { Text("朱色底帖") },
             )
         }
-        Text(
-            "单指拖动照片，双指缩放、旋转，把纸上的「${entry.char}」对准方框里的朱色底帖。",
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-        )
         BoxWithConstraints(
             Modifier
                 .weight(1f)
@@ -180,10 +174,10 @@ fun CropScreen(
                         busy = true
                         val aligned = withContext(Dispatchers.Default) { autoAlign(vm, photo, transform, index, script) }
                         if (aligned == null) {
-                            message = "方框里没找到墨迹，先把字大致挪进来。"
+                            message = "方框里没找到墨迹。"
                         } else {
                             transform = aligned
-                            message = "已按墨迹外框和重心对齐，可以再手动微调。"
+                            message = null
                         }
                         busy = false
                     }

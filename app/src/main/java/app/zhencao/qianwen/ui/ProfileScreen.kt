@@ -37,14 +37,9 @@ fun ProfileScreen(vm: AppViewModel, modifier: Modifier = Modifier) {
                 )
             }
         }
-        Text(
-            "只显示所选书体。临作按书体分开记录。",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
         SectionLabel("临作")
         Text(
-            "临作照片只存在本机，不上传。已临 ${home.counts.size} 字，共 ${home.counts.values.sum()} 次。",
+            "已临 ${home.counts.size} 字，共 ${home.counts.values.sum()} 次。",
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )

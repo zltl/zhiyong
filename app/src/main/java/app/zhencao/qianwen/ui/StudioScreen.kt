@@ -142,7 +142,7 @@ fun StudioScreen(
             Modifier.fillMaxWidth().padding(top = 8.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            Button(onClick = picker.camera, modifier = Modifier.weight(1f)) { Text("拍临作") }
+            OutlinedButton(onClick = picker.camera, modifier = Modifier.weight(1f)) { Text("拍临作") }
             OutlinedButton(onClick = picker.gallery, modifier = Modifier.weight(1f)) { Text("相册") }
             if (sheet != null) {
                 OutlinedButton(onClick = onFrame, modifier = Modifier.weight(1f)) { Text("接着框") }
@@ -573,12 +573,12 @@ private fun PracticeStrip(
     onOpen: (Long) -> Unit,
 ) {
     Column(Modifier.fillMaxWidth().padding(top = 12.dp)) {
-        Text(
-            if (practices.isEmpty()) "还没有临作。在纸上写好，拍下来框进格子。" else "临作 ${practices.size} 次",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
         if (practices.isNotEmpty()) {
+            Text(
+                "临作 ${practices.size} 次",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
             LazyRow(
                 Modifier.padding(top = 8.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),

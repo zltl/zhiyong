@@ -123,7 +123,7 @@ fun CompareScreen(
             ComparePanel(ready, mode, opacity, script?.let { entry.glyphAsset(it) })
             when (mode) {
                 CompareMode.OVERLAY -> {
-                    Text("朱色是底帖，墨色是临作。临作浓淡 ${(opacity * 100).roundToInt()}%")
+                    Text("临作 ${(opacity * 100).roundToInt()}%")
                     Slider(value = opacity, onValueChange = { opacity = it })
                 }
                 CompareMode.DIFF -> Legend()
@@ -197,7 +197,7 @@ private fun Hints(analysis: Analysis) {
     val comparison = analysis.comparison
     if (comparison == null) {
         Text(
-            "临作里没找到墨迹。回去重新框一次，让字落在方框中间。",
+            "临作里没找到墨迹。",
             color = MaterialTheme.colorScheme.primary,
         )
         return
@@ -210,11 +210,6 @@ private fun Hints(analysis: Analysis) {
     )
     Text("重心${shiftLabel(comparison.dx, comparison.dy)}", style = MaterialTheme.typography.bodyMedium)
     Text("字形${sizeLabel(comparison.widthRatio, comparison.heightRatio)}", style = MaterialTheme.typography.bodyMedium)
-    Text(
-        "只比墨迹落点，供对照，不是评分。用笔、牵丝和墨色请自己看。",
-        style = MaterialTheme.typography.bodySmall,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-    )
 }
 
 private suspend fun buildImages(vm: AppViewModel, practice: PracticeEntity): CompareImages? {

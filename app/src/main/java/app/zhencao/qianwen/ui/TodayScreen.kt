@@ -107,11 +107,6 @@ fun TodayScreen(
                 }
             }
         }
-        Text(
-            "先在纸上写完这一句，再点字拍照。一张纸可以连着框几个字。",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
     }
 }
 

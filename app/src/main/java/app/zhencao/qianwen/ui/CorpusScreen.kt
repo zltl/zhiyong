@@ -1,14 +1,17 @@
 package app.zhencao.qianwen.ui
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -22,12 +25,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import app.zhencao.qianwen.AppViewModel
 import app.zhencao.qianwen.data.VERSE_COUNT
+import app.zhencao.qianwen.model.CharacterEntry
+import app.zhencao.qianwen.model.ScriptStyle
 import app.zhencao.qianwen.ui.theme.PaperDeep
+import app.zhencao.qianwen.ui.theme.SheetPaper
 import app.zhencao.qianwen.ui.theme.Zhu
 
 @Composable
@@ -38,19 +42,14 @@ fun CorpusScreen(
     onPickVerse: (Int) -> Unit,
 ) {
     val home by vm.home.collectAsState()
+    val script = home.script ?: return
     val groups = remember { (0 until VERSE_COUNT).toList() }
     val listState = rememberLazyListState(initialFirstVisibleItemIndex = (home.verse - 3).coerceAtLeast(0))
     Column(modifier.fillMaxSize()) {
         Text(
             "千文",
             style = MaterialTheme.typography.headlineMedium,
-            modifier = Modifier.padding(start = 24.dp, top = 28.dp, end = 24.dp),
-        )
-        Text(
-            "点编号从这句接着写，点字直接看${home.script?.bookLabel.orEmpty()}。",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(start = 24.dp, end = 24.dp, top = 6.dp, bottom = 8.dp),
+            modifier = Modifier.padding(start = 24.dp, top = 28.dp, end = 24.dp, bottom = 8.dp),
         )
         LazyColumn(
             state = listState,
@@ -82,13 +81,10 @@ fun CorpusScreen(
                     Column(Modifier.weight(1f).padding(vertical = 6.dp)) {
                         Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                             chars.forEach { entry ->
-                                Text(
-                                    entry.char,
-                                    fontFamily = FontFamily.Serif,
-                                    fontSize = 28.sp,
-                                    modifier = Modifier
-                                        .clickable { onOpen(entry.index) }
-                                        .padding(horizontal = 6.dp, vertical = 4.dp),
+                                CorpusGlyphThumb(
+                                    entry = entry,
+                                    script = script,
+                                    modifier = Modifier.clickable { onOpen(entry.index) },
                                 )
                             }
                         }
@@ -112,6 +108,29 @@ fun CorpusScreen(
                     )
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun CorpusGlyphThumb(
+    entry: CharacterEntry,
+    script: ScriptStyle,
+    modifier: Modifier = Modifier,
+) {
+    val photo = rememberGlyphBitmap(entry.glyphAsset(script))
+    Box(
+        modifier
+            .padding(horizontal = 2.dp, vertical = 2.dp)
+            .size(40.dp)
+            .clip(RoundedCornerShape(4.dp))
+            .background(SheetPaper),
+        contentAlignment = Alignment.Center,
+    ) {
+        if (photo != null) {
+            Canvas(Modifier.fillMaxSize().padding(2.dp)) { drawFitted(photo) }
+        } else {
+            Text(entry.char, style = MaterialTheme.typography.titleMedium)
         }
     }
 }

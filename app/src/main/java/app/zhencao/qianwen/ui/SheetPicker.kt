@@ -56,7 +56,7 @@ fun rememberSheetPicker(vm: AppViewModel, onReady: () -> Unit): SheetPicker {
     }
 
     val permission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
-        if (granted) launchCamera() else message = "没有相机权限，可以从相册选一张临作。"
+        if (granted) launchCamera() else message = "没有相机权限。"
     }
     val pickImage = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
         if (uri != null) open(uri)
