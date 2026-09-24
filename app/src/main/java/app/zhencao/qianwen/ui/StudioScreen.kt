@@ -331,20 +331,20 @@ private fun EditionFrame(
     }
 }
 
-private val glyphSwipeThreshold = 48.dp
+internal val glyphSwipeThreshold = 48.dp
 
 /** How far a swipe still follows the finger when there is no further glyph. */
 internal const val slideResistance = 0.28f
 
 internal enum class GlyphTurn { Next, Previous }
 
-/** Up or right selects the next glyph; down or left selects the previous one. */
+/** Up or left selects the next glyph; down or right selects the previous one. */
 internal fun glyphTurn(dx: Float, dy: Float, threshold: Float): GlyphTurn? {
     val horizontal = abs(dx)
     val vertical = abs(dy)
     if (max(horizontal, vertical) < threshold) return null
     return if (horizontal >= vertical) {
-        if (dx > 0f) GlyphTurn.Next else GlyphTurn.Previous
+        if (dx < 0f) GlyphTurn.Next else GlyphTurn.Previous
     } else {
         if (dy < 0f) GlyphTurn.Next else GlyphTurn.Previous
     }
@@ -392,7 +392,7 @@ internal fun incomingOffset(
     val aimY: Float
     when {
         forwardHint != null -> {
-            aimX = if (forwardHint) 1f else -1f
+            aimX = if (forwardHint) -1f else 1f
             aimY = 0f
         }
         abs(drag.x) >= abs(drag.y) && drag.x != 0f -> {
@@ -421,7 +421,7 @@ internal fun settleTarget(drag: Offset, width: Float, height: Float): Offset {
  * Slides the shown glyph with the finger. [shown] changes only after the page has finished moving,
  * so the picture eases into place instead of swapping under the finger.
  */
-private class GlyphPager(
+internal class GlyphPager(
     initial: Int,
     private val lastIndex: Int,
     private val scope: CoroutineScope,
@@ -495,7 +495,7 @@ private class GlyphPager(
         }
         incoming = next
         val target = Offset(
-            if (next > shown) viewport.width.toFloat() else -viewport.width.toFloat(),
+            if (next > shown) -viewport.width.toFloat() else viewport.width.toFloat(),
             0f,
         )
         animate(target) {
@@ -525,6 +525,42 @@ private class GlyphPager(
                 }
             }
             if (epoch == ticket) end()
+        }
+    }
+}
+
+/** Turns the page after the finger passes touch slop, so a tap can still hit a child. */
+internal suspend fun PointerInputScope.detectPageSwipe(
+    onGrab: () -> Offset,
+    onDrag: (Offset) -> Unit,
+    onRelease: () -> Unit,
+    onCancel: () -> Unit,
+) {
+    val slop = viewConfiguration.touchSlop
+    awaitEachGesture {
+        awaitFirstDown(requireUnconsumed = false)
+        var pan = Offset.Zero
+        var dragging = false
+        var origin = Offset.Zero
+        while (true) {
+            val event = awaitPointerEvent()
+            val pressed = event.changes.count { it.pressed }
+            if (pressed == 0) {
+                if (dragging) onRelease()
+                break
+            }
+            if (pressed >= 2) {
+                if (dragging) onCancel()
+                break
+            }
+            pan += event.calculatePan()
+            if (!dragging) {
+                if (pan.getDistance() < slop) continue
+                dragging = true
+                origin = onGrab()
+            }
+            onDrag(origin + pan)
+            event.changes.forEach { if (it.positionChanged()) it.consume() }
         }
     }
 }

@@ -23,12 +23,12 @@ import org.junit.Test
 
 class QianwenLogicTest {
     @Test
-    fun swipeUpOrRightSelectsTheNextGlyph() {
+    fun swipeUpOrLeftSelectsTheNextGlyph() {
         val threshold = 48f
         assertEquals(GlyphTurn.Next, glyphTurn(0f, -80f, threshold))
-        assertEquals(GlyphTurn.Next, glyphTurn(80f, 10f, threshold))
+        assertEquals(GlyphTurn.Next, glyphTurn(-80f, 10f, threshold))
         assertEquals(GlyphTurn.Previous, glyphTurn(0f, 80f, threshold))
-        assertEquals(GlyphTurn.Previous, glyphTurn(-80f, -10f, threshold))
+        assertEquals(GlyphTurn.Previous, glyphTurn(80f, -10f, threshold))
         assertEquals(null, glyphTurn(20f, -20f, threshold))
     }
 
@@ -38,13 +38,13 @@ class QianwenLogicTest {
         val height = 800f
         val right = resistedSlide(120f, 10f, index = 3, lastIndex = 10)
         assertEquals(Offset(120f, 0f), right)
-        assertEquals(4, incomingIndex(3, right, 10))
+        assertEquals(2, incomingIndex(3, right, 10))
         assertEquals(Offset(120f - width, 0f), incomingOffset(right, width, height))
         assertEquals(Offset(width, 0f), settleTarget(right, width, height))
 
         val left = resistedSlide(-80f, 10f, index = 3, lastIndex = 10)
         assertEquals(Offset(-80f, 0f), left)
-        assertEquals(2, incomingIndex(3, left, 10))
+        assertEquals(4, incomingIndex(3, left, 10))
         assertEquals(Offset(-80f + width, 0f), incomingOffset(left, width, height))
         assertEquals(Offset(-width, 0f), settleTarget(left, width, height))
 
@@ -54,17 +54,17 @@ class QianwenLogicTest {
         assertEquals(Offset(0f, -100f + height), incomingOffset(up, width, height))
         assertEquals(Offset(0f, -height), settleTarget(up, width, height))
 
-        assertEquals(Offset(-width, 0f), incomingOffset(Offset.Zero, width, height, forwardHint = true))
-        assertEquals(Offset(width, 0f), incomingOffset(Offset.Zero, width, height, forwardHint = false))
+        assertEquals(Offset(width, 0f), incomingOffset(Offset.Zero, width, height, forwardHint = true))
+        assertEquals(Offset(-width, 0f), incomingOffset(Offset.Zero, width, height, forwardHint = false))
     }
 
     @Test
     fun slideResistsAtTheEndsWithoutCompounding() {
-        val blocked = resistedSlide(100f, 0f, index = 10, lastIndex = 10)
-        assertEquals(100f * slideResistance, blocked.x, 0.01f)
+        val blocked = resistedSlide(-100f, 0f, index = 10, lastIndex = 10)
+        assertEquals(-100f * slideResistance, blocked.x, 0.01f)
         assertEquals(0f, blocked.y, 0.01f)
         assertEquals(null, incomingIndex(10, blocked, 10))
-        assertEquals(100f, unwindSlide(blocked, 10, 10).x, 0.05f)
+        assertEquals(-100f, unwindSlide(blocked, 10, 10).x, 0.05f)
 
         val open = resistedSlide(100f, 0f, index = 3, lastIndex = 10)
         assertEquals(open, unwindSlide(open, 3, 10))
