@@ -77,7 +77,6 @@ import java.time.format.DateTimeFormatter
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.roundToInt
-import kotlin.math.sign
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -347,16 +346,10 @@ internal const val slideResistance = 0.28f
 
 internal enum class GlyphTurn { Next, Previous }
 
-/** Up or left selects the next glyph; down or right selects the previous one. */
+/** Up selects the next glyph; down selects the previous one. A sideways swipe does not turn. */
 internal fun glyphTurn(dx: Float, dy: Float, threshold: Float): GlyphTurn? {
-    val horizontal = abs(dx)
-    val vertical = abs(dy)
-    if (max(horizontal, vertical) < threshold) return null
-    return if (horizontal >= vertical) {
-        if (dx < 0f) GlyphTurn.Next else GlyphTurn.Previous
-    } else {
-        if (dy < 0f) GlyphTurn.Next else GlyphTurn.Previous
-    }
+    if (abs(dy) < threshold || abs(dx) >= abs(dy)) return null
+    return if (dy < 0f) GlyphTurn.Next else GlyphTurn.Previous
 }
 
 /** Finger position before resistance, so a second grab does not rubber-band twice. */
@@ -366,9 +359,10 @@ internal fun unwindSlide(slide: Offset, index: Int, lastIndex: Int): Offset {
     return Offset(slide.x / slideResistance, slide.y / slideResistance)
 }
 
-/** Locks the swipe to its dominant axis, and shortens it at the first or last glyph. */
+/** Follows a vertical swipe, and shortens it at the first or last glyph. Sideways motion stays put. */
 internal fun resistedSlide(dx: Float, dy: Float, index: Int, lastIndex: Int): Offset {
-    val slide = if (abs(dx) >= abs(dy)) Offset(dx, 0f) else Offset(0f, dy)
+    if (abs(dx) >= abs(dy) || dy == 0f) return Offset.Zero
+    val slide = Offset(0f, dy)
     if (slide == Offset.Zero) return Offset.Zero
     return if (incomingIndex(index, slide, lastIndex) == null) {
         Offset(slide.x * slideResistance, slide.y * slideResistance)
@@ -397,33 +391,18 @@ internal fun incomingOffset(
     height: Float,
     forwardHint: Boolean? = null,
 ): Offset {
-    val aimX: Float
-    val aimY: Float
-    when {
-        forwardHint != null -> {
-            aimX = if (forwardHint) -1f else 1f
-            aimY = 0f
-        }
-        abs(drag.x) >= abs(drag.y) && drag.x != 0f -> {
-            aimX = sign(drag.x)
-            aimY = 0f
-        }
-        drag.y != 0f -> {
-            aimX = 0f
-            aimY = sign(drag.y)
-        }
+    val forward = forwardHint ?: when {
+        drag.y != 0f -> drag.y < 0f
         else -> return Offset.Zero
     }
-    return Offset(drag.x - aimX * width, drag.y - aimY * height)
+    val aimY = if (forward) -1f else 1f
+    return Offset(0f, drag.y - aimY * height)
 }
 
 /** Resting place once the finger has committed to turning the page. */
 internal fun settleTarget(drag: Offset, width: Float, height: Float): Offset {
-    return if (abs(drag.x) >= abs(drag.y)) {
-        Offset(sign(drag.x) * width, 0f)
-    } else {
-        Offset(0f, sign(drag.y) * height)
-    }
+    val aim = if (drag.y < 0f) -1f else 1f
+    return Offset(0f, aim * height)
 }
 
 /**
@@ -504,8 +483,8 @@ internal class GlyphPager(
         }
         incoming = next
         val target = Offset(
-            if (next > shown) -viewport.width.toFloat() else viewport.width.toFloat(),
             0f,
+            if (next > shown) -viewport.height.toFloat() else viewport.height.toFloat(),
         )
         animate(target) {
             incoming = null
@@ -581,27 +560,40 @@ private suspend fun PointerInputScope.detectGlyphGestures(
     onRelease: () -> Unit,
     onCancel: () -> Unit,
 ) {
+    val slop = viewConfiguration.touchSlop
     awaitEachGesture {
         awaitFirstDown(requireUnconsumed = false)
-        val origin = onGrab()
-        var multiTouch = false
         var pan = Offset.Zero
+        var dragging = false
+        var zooming = false
+        var origin = Offset.Zero
         while (true) {
             val event = awaitPointerEvent()
             val pressed = event.changes.count { it.pressed }
-            if (pressed >= 2) multiTouch = true
-            if (multiTouch && onTransform != null && pressed >= 2) {
+            if (pressed == 0) {
+                if (dragging) onRelease()
+                break
+            }
+            if (pressed >= 2 && onTransform != null) {
+                if (!zooming && dragging) onCancel()
+                dragging = false
+                zooming = true
                 val zoom = event.calculateZoom()
                 val drag = event.calculatePan()
                 if (zoom != 1f || drag != Offset.Zero) onTransform(drag, zoom)
-            } else if (!multiTouch) {
-                pan += event.calculatePan()
-                onDrag(origin + pan)
+                event.changes.forEach { if (it.positionChanged()) it.consume() }
+                continue
             }
+            if (zooming) continue
+            pan += event.calculatePan()
+            if (!dragging) {
+                if (pan.getDistance() < slop) continue
+                dragging = true
+                origin = onGrab()
+            }
+            onDrag(origin + pan)
             event.changes.forEach { if (it.positionChanged()) it.consume() }
-            if (pressed == 0) break
         }
-        if (multiTouch) onCancel() else onRelease()
     }
 }
 
