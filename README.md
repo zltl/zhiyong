@@ -6,7 +6,7 @@
 
 ## 安装
 
-需要 Android 8.0 及以上。从 [Releases](https://github.com/zltl/zhiyong/releases) 下载 `zhiyong-0.2.0.apk`，允许安装未知来源后安装。
+需要 Android 8.0 及以上。从 [Releases](https://github.com/zltl/zhiyong/releases) 下载 `zhiyong-0.2.1.apk`，允许安装未知来源后安装。
 
 当前包用调试签名。以后若换成正式签名，需要先卸载再装。
 
